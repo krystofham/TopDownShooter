@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://bk43twcsny0hr"]
+
+[ext_resource type="Script" uid="uid://brp5idneuhndo" path="res://scripts/ui.gd" id="1_nt7q6"]
+[ext_resource type="Texture2D" uid="uid://cskdc2l13typ0" path="res://assets/MAP, PERSON/Tiles/tile_01.png" id="2_x4jx1"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yev5y"]
+load_path = "res://.godot/imported/tile_14.png-e8191b7ded0caa839847cfe429b15fa2.ctex"
+
+[node name="UI" type="CanvasLayer" unique_id=506577777]
+script = ExtResource("1_nt7q6")
+
+[node name="HUD" type="Control" parent="." unique_id=1404594502]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HealthBar" type="TextureProgressBar" parent="HUD" unique_id=1064871942]
+layout_mode = 1
+offset_right = 64.0
+offset_bottom = 64.0
+texture_under = SubResource("CompressedTexture2D_yev5y")
+texture_progress = ExtResource("2_x4jx1")
+
+[node name="AmoLabel" type="Label" parent="HUD" unique_id=607067437]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="TimeLabel" type="Label" parent="HUD" unique_id=1747741907]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 23.0
+grow_horizontal = 2
+
+[node name="TeamLabel" type="Label" parent="HUD" unique_id=2066706815]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 23.0
+grow_horizontal = 0

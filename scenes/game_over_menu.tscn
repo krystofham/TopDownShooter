@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://bgh0ku7lc26rn"]
+
+[ext_resource type="Script" uid="uid://ck887awvyj2s0" path="res://scripts/game_over_menu.gd" id="1_6ebp1"]
+
+[node name="GameOverMenu" type="CanvasLayer" unique_id=835458143]
+script = ExtResource("1_6ebp1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1350805840]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1188767363]
+layout_mode = 2
+text = "GAME OVER"
+uppercase = true
+
+[node name="RestartButton" type="Button" parent="VBoxContainer" unique_id=451506545]
+layout_mode = 2
+text = "Restart"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=1560443722]
+layout_mode = 2
+text = "Ukončit hru"
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1472541659]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.44313726, 0, 0.023529412, 0.6)

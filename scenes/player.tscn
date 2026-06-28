@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://7ku51ddp64f2"]
+
+[ext_resource type="Script" uid="uid://dihymyobvb1jx" path="res://scripts/player.gd" id="1_4flbx"]
+[ext_resource type="Script" uid="uid://bu6jli7rygbes" path="res://scripts/muzzle_flash.gd" id="2_qhqgy"]
+[ext_resource type="Texture2D" uid="uid://rbf00872nuhj" path="res://assets/circles/friendcircle.png" id="2_smehm"]
+[ext_resource type="Texture2D" uid="uid://ctlrvsg1vgd1i" path="res://assets/MAP, PERSON/Soldier 1/soldier1_machine.png" id="4_tuyoq"]
+[ext_resource type="Texture2D" uid="uid://cvom4jtkix77u" path="res://assets/MAP, PERSON/Soldier 1/soldier1_reload.png" id="5_fjrip"]
+[ext_resource type="Texture2D" uid="uid://dqjjsgmyoli48" path="res://assets/MAP, PERSON/Soldier 1/soldier1_gun.png" id="5_smehm"]
+[ext_resource type="Texture2D" uid="uid://cj7w1xjtsux72" path="res://assets/MAP, PERSON/Soldier 1/soldier1_stand.png" id="6_smehm"]
+[ext_resource type="AudioStream" uid="uid://b3cdnbaewf4ee" path="res://assets/sounds/voice of gun.wav" id="6_tuyoq"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
+radius = 9.0
+height = 32.0
+
+[sub_resource type="Gradient" id="Gradient_qpkb6"]
+offsets = PackedFloat32Array(0, 0.7409639, 1)
+colors = PackedColorArray(0.7460887, 0.7551912, 3.85046e-07, 1, 0.84704137, 0.8525248, 0.3975906, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dqkch"]
+gradient = SubResource("Gradient_qpkb6")
+width = 11
+height = 6
+fill = 1
+fill_from = Vector2(0, 0.5021739)
+fill_to = Vector2(0.98260874, 0.45434782)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xbask"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_fjrip")
+}],
+"loop": 1,
+"name": &"Reload",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_smehm")
+}],
+"loop": 1,
+"name": &"Standing",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_tuyoq")
+}],
+"loop": 1,
+"name": &"primary",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_smehm")
+}],
+"loop": 1,
+"name": &"secondary",
+"speed": 5.0
+}]
+
+[node name="Player" type="CharacterBody2D" unique_id=124077518]
+script = ExtResource("1_4flbx")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1153699293]
+position = Vector2(-1.9999847, -1.0000038)
+scale = Vector2(1.1944444, 1.1388888)
+texture = ExtResource("2_smehm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1067619688]
+position = Vector2(-5, 0)
+shape = SubResource("CapsuleShape2D_qlg0r")
+debug_color = Color(0.41600513, 0.00018087536, 0.4404624, 0.41960785)
+
+[node name="GunRay" type="RayCast2D" parent="." unique_id=318390858]
+target_position = Vector2(1000, 0)
+collide_with_areas = true
+
+[node name="MuzzleFlash" type="Sprite2D" parent="." unique_id=438287592]
+position = Vector2(10, 0)
+scale = Vector2(1.3599999, 1.0399994)
+texture = SubResource("GradientTexture2D_dqkch")
+script = ExtResource("2_qhqgy")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=800316747]
+position = Vector2(-1, -1)
+scale = Vector2(0.75, 0.75)
+sprite_frames = SubResource("SpriteFrames_xbask")
+animation = &"secondary"
+
+[node name="ShootSound" type="AudioStreamPlayer2D" parent="." unique_id=2012241636]
+position = Vector2(10, 0)
+stream = ExtResource("6_tuyoq")
+max_distance = 1000.0
+attenuation = 2.549118
+
+[node name="Line2D" type="Line2D" parent="." unique_id=1222826981]
+width = 2.0
+default_color = Color(0.80425304, 0.84303916, 0.41207865, 1)
