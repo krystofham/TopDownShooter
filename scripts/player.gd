@@ -12,6 +12,7 @@ var is_reloading = false
 var guns = ["primary", "secondary"]
 var active_gun = "primary"
 var active_amo = 20
+var rounds = 3
 var can_shoot = true
 # Odkazy na uzly
 @onready var gun_ray = $GunRay

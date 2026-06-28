@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GD CS2.5"
-run/main_scene="uid://c68y7mnld5kw2"
+run/main_scene="uid://p6jdcceueq2q"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

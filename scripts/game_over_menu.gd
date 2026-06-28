@@ -1,16 +1,25 @@
 extends CanvasLayer
 
 func _ready():
-	# Když se menu objeví, chceme, aby se hra zapauzovala
-	process_mode = PROCESS_MODE_ALWAYS # Menu poběží i při pauze
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().paused = true
 	
-	# Zviditelníme myš, pokud jsi ji měl ve hře schovanou nebo změněnou
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
+	var restart_btn = get_node_or_null("ColorRect/VBoxContainer/RestartButton")
+	var quit_btn = get_node_or_null("ColorRect/VBoxContainer/QuitButton")
+	
+	if restart_btn and not restart_btn.pressed.is_connected(_on_restart_button_pressed):
+		restart_btn.pressed.connect(_on_restart_button_pressed)
+		
+	if quit_btn and not quit_btn.pressed.is_connected(_on_quit_button_pressed):
+		quit_btn.pressed.connect(_on_quit_button_pressed)
 
 func _on_restart_button_pressed():
-	get_tree().paused = false # Odpauzujeme hru
-	get_tree().reload_current_scene() # Znovu načteme aktuální scénu (restart)
+	print("Restartuji scénu...")
+	get_tree().paused = false 
+	get_tree().reload_current_scene() 
 
 func _on_quit_button_pressed():
-	get_tree().quit() # Zavře hru
+	print("Ukončuji hru z Game Over menu...")
+	get_tree().quit()
