@@ -128,6 +128,7 @@ func shoot():
 	laser_line.add_point(Vector2.ZERO)
 	if gun_ray.is_colliding():
 		var hit_object = gun_ray.get_collider()
+		print(hit_object)
 		if hit_object and hit_object.has_method("take_damage"):
 			hit_object.take_damage(DMG[index])
 		var local_hit_pos = to_local(gun_ray.get_collision_point())

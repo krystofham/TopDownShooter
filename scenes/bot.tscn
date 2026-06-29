@@ -9,8 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://3ht38owv8ypu" path="res://assets/circles/enemycircle.png" id="7_bf32g"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
-radius = 10.395819
-height = 37.27102
+radius = 8.0
+height = 32.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_qpkb6"]
 animations = [{
@@ -57,7 +57,6 @@ script = ExtResource("1_cwism")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=371289896]
 position = Vector2(-6, -2.9802322e-08)
-scale = Vector2(1.0434846, 0.8854064)
 shape = SubResource("CapsuleShape2D_qlg0r")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=189997935]

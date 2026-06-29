@@ -131,7 +131,7 @@ func _physics_process(delta):
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
 			if distance < 500.0 and not is_reloading and can_see_player():
-				bot_shoot()
+				#bot_shoot()
 				shoot_timer = 0.0
 
 func start_reload():
@@ -158,7 +158,6 @@ func bot_shoot():
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (player.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
 	query.exclude = [self]
-	
 	var result = space_state.intersect_ray(query)
 	
 	if result:
