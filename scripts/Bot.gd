@@ -24,7 +24,7 @@ var change_dir_timer = 0.0
 const SPREAD = 5
 var fire_rate = 0.4      
 var shoot_timer = 0.0      
-const BOT_DAMAGE = 0
+const BOT_DAMAGE = 15
 const RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
