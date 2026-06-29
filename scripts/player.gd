@@ -71,8 +71,12 @@ func _handle_animations(input_dir: Vector2):
 # Profesionální zpracování střelby a recoilu
 func _handle_shooting():
 	if active_amo <= 0:
-		reload() # Automatický reload bez await, spouští se na pozadí
-		return
+		var inverse_index = 1 if active_gun == "primary" else 0
+		if amo[inverse_index] < 2:
+			reload() 
+			return
+		else:
+			_handle_weapon_switch()
 
 	# Spustíme samotný výstřel (odečtení nábojů, zvuk, raycast)
 	shoot()
