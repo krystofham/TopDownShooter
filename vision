@@ -1,0 +1,59 @@
+[STRUKTURA UKLADANI DAT NA DISK]
+Soubor: user://savegame.cfg
+Sekce: [Player]
+Klice: username (String), elo (int)
+Pouziti: Nacita se pouze pri startu hry do ModeManageru. Zapisu se do nej nova data az po skonceni celeho zapasu v ModeManageru.
+
+[STRUKTURA GLOBALNICH MANAZERU V PAMETI]
+
+    ModeManager (Autoload)
+
+    Promenne v pameti: username, elo, current_rank_title, rank_asset_path, current_mode
+
+    Funkce:
+
+        load_system_config(): Nacte username a elo z disku (savegame.cfg).
+
+        calculate_rank(): Vypocita textovy rank a priradi spravnou cestu k ikoně podle hodnoty elo.
+
+        save_system_config(): Zapise aktualni elo a username na disk (savegame.cfg).
+
+        process_match_end(victory, final_kills, final_deaths): Prijme vysledek zapasu od GameManageru, prepocita elo, aktualizuje rank a ulozi data na disk.
+
+    GameManager (Autoload)
+
+    Promenne v pameti: match_max_rounds, player_match_kills, player_match_deaths, score_team_a, score_team_b, current_round_number
+
+    Funkce:
+
+        init_match(max_rounds, mode): Vynuluje stats zapasu a nastavi pravidla podle zvoleneho modu z ModeManageru.
+
+        register_round_results(round_won, round_kills, player_died): Prijme data z Round Menu, pripocte killy a skore, zvysi cislo kola a zkontroluje konec zapasu.
+
+        send_results_to_mode_manager(): Pokud zapas skoncil, zabali data (victory, player_match_kills, player_match_deaths) a zavola ModeManager.
+
+[TOK HRY A SCENY]
+
+    Main Menu Scena
+
+    Zobrazi username, elo a rank asset, ktere si vytahne z ModeManageru.
+
+    Tlacitka Casual / Ranked zavolaji ModeManager.start_match(mode).
+
+    Map Menu / Loading Scena
+
+    Spusti se po vyberu modu. Prehraje intro.
+
+    Ceka na stisk tlacitka Play. Po stisku zavola GameManager.init_match() a nacte samotnou scenu mapy.
+
+    Herni Scena a Round Rezie
+
+    Bezi samotna hratelnost (hrac, boti, strileni).
+
+    Kód sceny detekuje konec kola (bomba, smrt tymu).
+
+    Pri konci kola se zobrazi Round Menu UI. To si vytahne konstanty (aktualni stav zapasu) z GameManageru.
+
+    Round Menu UI vraci do GameManageru data za toto jedno kolo pomoci funkce GameManager.register_round_results(round_won, round_kills, player_died).
+
+    GameManager bud spusti dalsi kolo v teto scene, nebo hru ukonci pres send_results_to_mode_manager().

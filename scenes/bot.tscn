@@ -53,6 +53,7 @@ fill_to = Vector2(0.98260874, 0.45434782)
 metadata/_snap_enabled = true
 
 [node name="Bot" type="CharacterBody2D" unique_id=259205109]
+collision_layer = 4
 script = ExtResource("1_cwism")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=371289896]
@@ -83,5 +84,4 @@ scale = Vector2(1.1111112, 1.138889)
 texture = ExtResource("7_bf32g")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1907023422]
-debug_enabled = true
 debug_path_custom_color = Color(0, 1, 1, 1)

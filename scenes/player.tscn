@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://dqjjsgmyoli48" path="res://assets/MAP, PERSON/Soldier 1/soldier1_gun.png" id="5_smehm"]
 [ext_resource type="Texture2D" uid="uid://cj7w1xjtsux72" path="res://assets/MAP, PERSON/Soldier 1/soldier1_stand.png" id="6_smehm"]
 [ext_resource type="AudioStream" uid="uid://b3cdnbaewf4ee" path="res://assets/sounds/voice of gun.wav" id="6_tuyoq"]
+[ext_resource type="Texture2D" uid="uid://cl8ht8ua1hhlm" path="res://assets/battery_person.png" id="8_ur7pv"]
+[ext_resource type="Texture2D" uid="uid://fffh1wahct04" path="res://assets/battery.png" id="9_y4r1p"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
 radius = 9.0
@@ -60,6 +62,8 @@ animations = [{
 }]
 
 [node name="Player" type="CharacterBody2D" unique_id=124077518]
+collision_layer = 8
+collision_mask = 5
 script = ExtResource("1_4flbx")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1067619688]
@@ -69,6 +73,7 @@ debug_color = Color(0.41600513, 0.00018087536, 0.4404624, 0.41960785)
 
 [node name="GunRay" type="RayCast2D" parent="." unique_id=318390858]
 target_position = Vector2(1000, 0)
+collision_mask = 5
 collide_with_areas = true
 
 [node name="MuzzleFlash" type="Sprite2D" parent="." unique_id=438287592]
@@ -92,3 +97,21 @@ attenuation = 2.549118
 [node name="Line2D" type="Line2D" parent="." unique_id=1222826981]
 width = 2.0
 default_color = Color(0.80425304, 0.84303916, 0.41207865, 1)
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=614633307]
+position = Vector2(2.0954232, 1.2296996)
+rotation = 0.006130674
+energy = 1.81
+range_item_cull_mask = 3
+shadow_enabled = true
+shadow_item_cull_mask = 3
+texture = ExtResource("9_y4r1p")
+offset = Vector2(256, 30)
+
+[node name="PointLight2D3" type="PointLight2D" parent="." unique_id=1202955443]
+position = Vector2(0.69847107, -1.2296753)
+rotation = -2.8727605
+energy = 1.9
+shadow_enabled = true
+texture = ExtResource("8_ur7pv")
+texture_scale = 0.4

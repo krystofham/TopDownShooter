@@ -131,7 +131,7 @@ func _physics_process(delta):
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
 			if distance < 500.0 and not is_reloading and can_see_player():
-				#bot_shoot()
+				bot_shoot()
 				shoot_timer = 0.0
 
 func start_reload():

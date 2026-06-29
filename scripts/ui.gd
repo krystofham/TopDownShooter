@@ -4,6 +4,7 @@ extends CanvasLayer
 @onready var amo_label = $HUD/AmoLabel
 @onready var time_label = $HUD/TimeLabel
 @onready var team_label = $HUD/TeamLabel
+const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
 
 var time_elapsed = 100.0
 
@@ -39,7 +40,14 @@ func update_time_display():
 	var minutes = int(time_elapsed) / 60
 	var seconds = int(time_elapsed) % 60
 	time_label.text = "ČAS: %02d:%02d" % [minutes, seconds]
+	if minutes == 0 and seconds == 0:
+		game_over()
 
 # Funkce pro výpis počtu živých hráčů na stranách (styl CS)
 func update_teams(players_alive: int, bots_alive: int):
-	team_label.text = "Terrorist: " + str(players_alive) + " | Counter: " + str(bots_alive)
+	team_label.text = "Counter: " + str(players_alive) + " | Terrorist: " + str(bots_alive)
+
+func game_over():
+	var game_over_instance = GAME_OVER_MENU_SCENE.instantiate()
+	get_tree().current_scene.add_child(game_over_instance)
+	queue_free()
