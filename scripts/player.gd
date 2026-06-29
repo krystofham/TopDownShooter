@@ -7,7 +7,7 @@ const DMG = [10, 20]
 const MAX_AMO = [20, 10]
 const MUZZLE_FLASH_TIME = 0.03
 var health = 100
-var amo = [20, 5]
+var amo = [20, 10]
 var is_reloading = false
 var guns = ["primary", "secondary"]
 var active_gun = "primary"
@@ -21,11 +21,19 @@ var can_shoot = true
 @onready var shoot_sound = $ShootSound
 @onready var laser_line = $Line2D
 @onready var ui = get_node("../UI") 
-const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
+
+signal request_action(action_name)
+
 func _ready():
 	gun_ray.target_position = Vector2(1000.0, 0.0)
 	if ui:
 		ui.update_amo(amo, MAX_AMO, active_gun)
+const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
+
+func safe_get_tree():
+	if is_inside_tree():
+		return get_tree()
+	return null
 
 func _physics_process(delta):
 	# 1. Pohyb hráče
@@ -79,7 +87,9 @@ func _handle_shooting():
 func _start_fire_cooldown():
 	can_shoot = false
 	var index = 0 if active_gun == "primary" else 1
-	get_tree().create_timer(FIRE_RATE[index]).timeout.connect(func(): can_shoot = true)
+	var tree = safe_get_tree()
+	if tree:
+		tree.create_timer(FIRE_RATE[index]).timeout.connect(func(): can_shoot = true)
 
 func _handle_manual_reload():
 	var index = 0 if active_gun == "primary" else 1
@@ -104,7 +114,9 @@ func reload():
 	var gun = active_gun
 	is_reloading = true
 	var index = 0 if gun == "primary" else 1
-	await get_tree().create_timer(2.0).timeout
+	var tree = safe_get_tree()
+	if tree:
+		await tree.create_timer(2.0).timeout
 	
 	amo[index] = MAX_AMO[index]
 	if active_gun == gun:
@@ -123,7 +135,9 @@ func shoot():
 		ui.update_amo(amo, MAX_AMO, active_gun)
 	
 	muzzle_flash.visible = true
-	get_tree().create_timer(MUZZLE_FLASH_TIME).timeout.connect(func(): muzzle_flash.visible = false)
+	var tree = safe_get_tree()
+	if tree:
+		tree.create_timer(MUZZLE_FLASH_TIME).timeout.connect(func(): muzzle_flash.visible = false)
 	laser_line.clear_points()
 	laser_line.add_point(Vector2.ZERO)
 	if gun_ray.is_colliding():
@@ -136,7 +150,11 @@ func shoot():
 	else:
 		var max_laser_length = Vector2(1000.0, 0.0).rotated(gun_ray.rotation)
 		laser_line.add_point(max_laser_length)
-	get_tree().create_timer(MUZZLE_FLASH_TIME).timeout.connect(func(): laser_line.clear_points())
+	if not is_inside_tree():
+		return
+	tree = safe_get_tree()
+	if tree:
+		tree.create_timer(MUZZLE_FLASH_TIME).timeout.connect(func(): laser_line.clear_points())
 
 func take_damage(amount):
 	health -= amount
@@ -146,8 +164,6 @@ func take_damage(amount):
 	if health <= 0:
 		if ui:
 			ui.update_teams(0, 1)
-		game_over()
-func game_over():
-	var game_over_instance = GAME_OVER_MENU_SCENE.instantiate()
-	get_tree().current_scene.add_child(game_over_instance)
-	queue_free()
+		round_over()
+func round_over():
+	emit_signal("request_action", "player_dead")

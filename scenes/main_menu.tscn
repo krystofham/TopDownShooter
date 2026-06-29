@@ -5,34 +5,58 @@
 [node name="Main_menu" type="CanvasLayer" unique_id=835458143]
 script = ExtResource("1_l6cm7")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1350805840]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Texture" type="MarginContainer" parent="." unique_id=2135910383]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -299.0
+offset_bottom = 247.0
+grow_horizontal = 0
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="RankIcon" type="TextureRect" parent="Texture" unique_id=258741849]
+layout_mode = 2
+stretch_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2029601984]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1350805840]
+layout_mode = 2
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=1188767363]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1188767363]
 layout_mode = 2
 text = "Counter strike z wishe"
 uppercase = true
 
-[node name="PlayButton" type="Button" parent="VBoxContainer" unique_id=1800370984]
+[node name="PlayButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1800370984]
 layout_mode = 2
 text = "Hraj"
 
-[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=1560443722]
+[node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1560443722]
 layout_mode = 2
 text = "Ukončit hru"
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1472541659]
+[node name="PlayerStats" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1653182939]
+layout_mode = 2
+text = "Counter strike z wishe"
+uppercase = true
+
+[node name="RankLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2011296918]
+layout_mode = 2
+text = "Counter strike z wishe"
+uppercase = true
+
+[node name="Background" type="ColorRect" parent="." unique_id=1472541659]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -41,4 +65,4 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.2899432, 0.47754407, 0.3981243, 0.32156864)
 
-[connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]

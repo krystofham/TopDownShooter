@@ -13,6 +13,8 @@ var player_spotted = false
 @onready var shoot_sound = $ShootSound
 @onready var nav_agent = $NavigationAgent2D
 
+signal request_action(action_name)
+
 const DIST_ATTACK = 100.0  
 const DIST_CHASE = 180.0
 var current_state = "CHASING"
@@ -22,7 +24,7 @@ var change_dir_timer = 0.0
 const SPREAD = 5
 var fire_rate = 0.4      
 var shoot_timer = 0.0      
-const BOT_DAMAGE = 20
+const BOT_DAMAGE = 0
 const RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
@@ -171,6 +173,5 @@ func take_damage(amount):
 	var ui = get_node_or_null("../UI")
 	
 	if health <= 0:
-		if ui:
-			ui.update_teams(1, 0) 
+		emit_signal("request_action", "ter_dead")
 		queue_free()

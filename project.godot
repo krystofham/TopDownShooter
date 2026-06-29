@@ -13,7 +13,12 @@ config_version=5
 config/name="GD CS2.5"
 run/main_scene="uid://p6jdcceueq2q"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="uid://dqjjsgmyoli48"
+
+[autoload]
+
+ModeManager="*uid://7qr7bm0lxaid"
+GameManager="*uid://cvlp3nb0gpbg7"
 
 [display]
 
