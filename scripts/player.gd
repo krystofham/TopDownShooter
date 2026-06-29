@@ -24,13 +24,41 @@ var can_shoot = true
 @onready var walk_sound = $Walk
 @onready var laser_line = $Line2D
 @onready var ui = get_node("../UI") 
+@onready var spawn_zone = get_node("../Counter") 
 
 signal request_action(action_name)
+
+func get_random_position_in_zone() -> Vector2:
+	if not spawn_zone:
+		print("Varování: Není nastavena žádná spawn_zone!")
+		return Vector2.ZERO
+		
+	# Najdeme CollisionShape2D uvnitř naší zóny
+	var shape_node = spawn_zone.get_node("CollisionShape2D") as CollisionShape2D
+	if not shape_node or not shape_node.shape is RectangleShape2D:
+		print("Chyba: Zóna musí mít RectangleShape2D!")
+		return Vector2.ZERO
+		
+	var rect_shape = shape_node.shape as RectangleShape2D
+	# Získáme poloviční velikost obdélníku (extents)
+	var extents = rect_shape.size / 2
+	
+	# Vygenerujeme náhodné X a Y v rozsahu od -extents do +extents
+	var random_x = randf_range(-extents.x, extents.x)
+	var random_y = randf_range(-extents.y, extents.y)
+	
+	# Přičteme globální pozici zóny, aby to fungovalo kdekoli na mapě
+	var local_random_pos = Vector2(random_x, random_y)
+	return shape_node.global_position + local_random_pos
+
 
 func _ready():
 	gun_ray.target_position = Vector2(1000.0, 0.0)
 	if ui:
 		ui.update_amo(amo, MAX_AMO, active_gun)
+	var random_pos = get_random_position_in_zone()
+	if random_pos != Vector2.ZERO:
+		global_position = random_pos
 const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
 
 func safe_get_tree():

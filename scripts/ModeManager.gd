@@ -3,7 +3,7 @@ extends Node
 var username: String = "Krystof"
 var elo: int = 1000
 var player_rank: String = "Silver II"
-var rank_asset_path: String = "res://assets/ranks/silver_2.png"
+var rank_asset_path: String = "res://assets/ranks/silver2.png"
 
 var current_mode: String = "casual"
 const CONFIG_FILE_PATH = "user://savegame.cfg"
@@ -40,7 +40,6 @@ func save_system_config():
 	else:
 		print("Chyba pri zapisu na disk! Kod chyby: ", err)
 
-# --- DYNAMICKÝ VÝPOČET RANKU ---
 
 const RANKS = [
 	# --- BRONZE ---
@@ -64,7 +63,6 @@ const RANKS = [
 	{"max_elo": 1399, "title": "Gold 4", "asset": "res://assets/Ranks/Gold/Gold4.png"},
 	{"max_elo": 1499, "title": "Gold PUSH", "asset": "res://assets/Ranks/Gold/GoldPUSH.png"},
 
-	# --- CHAMP ---
 	{"max_elo": 1599, "title": "Champ 1", "asset": "res://assets/Ranks/Champ/Champ1.png"},
 	{"max_elo": 1699, "title": "Champ 2", "asset": "res://assets/Ranks/Champ/Champ2.png"},
 	{"max_elo": 1799, "title": "Champ 3", "asset": "res://assets/Ranks/Champ/Champ3.png"},
@@ -101,7 +99,7 @@ func process_match_end(victory: bool, final_kills: int, final_deaths: int):
 		else:
 			elo_change -= 20
 		
-		elo_change += (final_kills - final_deaths) * 2
+		elo_change += (final_kills - final_deaths) * 2 
 		
 		elo += elo_change
 		print("Zmena ELO: ", elo_change, ". Nove celkove ELO: ", elo)

@@ -21,6 +21,16 @@ theme_override_constants/margin_bottom = 50
 layout_mode = 2
 stretch_mode = 2
 
+[node name="Rankprogress" type="ProgressBar" parent="." unique_id=219582716]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -227.0
+offset_right = 259.0
+offset_bottom = 44.0
+grow_horizontal = 2
+show_percentage = false
+
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=2029601984]
 offset_right = 40.0
 offset_bottom = 40.0
@@ -41,6 +51,10 @@ uppercase = true
 [node name="PlayButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1800370984]
 layout_mode = 2
 text = "Hraj"
+
+[node name="PlayRankedButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=894699189]
+layout_mode = 2
+text = "Play Ranked"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1560443722]
 layout_mode = 2

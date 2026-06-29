@@ -14,6 +14,9 @@ var is_playing_footstep = false
 @onready var shoot_sound = $ShootSound
 @onready var nav_agent = $NavigationAgent2D
 @onready var walk_sound = $Walk
+@onready var spawn_zone = get_node("../TerSpawn")
+
+
 signal request_action(action_name)
 
 const DIST_ATTACK = 100.0  
@@ -21,7 +24,7 @@ const DIST_CHASE = 180.0
 var current_state = "CHASING"
 
 var random_dir = Vector2.ZERO
-var change_dir_timer = 0.0
+var change_dir_timer = 0.2
 const SPREAD = 5
 var fire_rate = 0.4      
 var shoot_timer = 0.2    
@@ -29,10 +32,68 @@ const BOT_DAMAGE = 15
 const RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
+
+func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
+
+	var other_bots = get_tree().get_nodes_in_group("enemies")
+	
+	for bot in other_bots:
+		if bot == self: 
+			continue 
+			
+		if bot.global_position.distance_to(pos) < min_dist:
+			return false
+			
+	return true
 func _ready():
 	await get_tree().physics_frame
-	if player:
+	
+	var random_pos = get_random_position_in_zone()
+	var max_attempts = 15 # Maximální počet pokusů pro nalezení místa, aby se hra nezasekla v nekonečné smyčce
+	var min_distance_between_bots = 80.0
+	for attempt in range(max_attempts):
+		var potential_pos = get_random_position_in_zone()
+		if potential_pos == Vector2.ZERO:
+			break
+			
+		if is_position_far_enough(potential_pos, min_distance_between_bots):
+			random_pos = potential_pos
+			break # Našli jsme dobré místo, ukončíme hledání
+			
+	# Záložní plán: pokud nenašel ideální volné místo po X pokusech, vezme jakékoliv náhodné v zóně
+	if random_pos == Vector2.ZERO:
+		random_pos = get_random_position_in_zone()
+	if random_pos != Vector2.ZERO:
+		nav_agent.target_position = random_pos
+		global_position = random_pos
+	elif player:
+		# Záložní plán: pokud zóna neexistuje, jdi po hráči
 		nav_agent.target_position = player.global_position
+
+
+func get_random_position_in_zone() -> Vector2:
+	if not spawn_zone:
+		print("Varování: Není nastavena žádná spawn_zone!")
+		return Vector2.ZERO
+		
+	# Najdeme CollisionShape2D uvnitř naší zóny
+	var shape_node = spawn_zone.get_node("CollisionShape2D") as CollisionShape2D
+	if not shape_node or not shape_node.shape is RectangleShape2D:
+		print("Chyba: Zóna musí mít RectangleShape2D!")
+		return Vector2.ZERO
+		
+	var rect_shape = shape_node.shape as RectangleShape2D
+	# Získáme poloviční velikost obdélníku (extents)
+	var extents = rect_shape.size / 2
+	
+	# Vygenerujeme náhodné X a Y v rozsahu od -extents do +extents
+	var random_x = randf_range(-extents.x, extents.x)
+	var random_y = randf_range(-extents.y, extents.y)
+	
+	# Přičteme globální pozici zóny, aby to fungovalo kdekoli na mapě
+	var local_random_pos = Vector2(random_x, random_y)
+	return shape_node.global_position + local_random_pos
+
 func can_see_player() -> bool:
 	if not player:
 		return false
@@ -159,6 +220,7 @@ func bot_shoot():
 		
 	amo -= 1
 	shoot_sound.pitch_scale = randf_range(0.9, 1.1)
+	shoot_sound.volume_db = randf_range(0.9, 1.1)
 	shoot_sound.play()
 	
 	muzzle_flash.visible = true

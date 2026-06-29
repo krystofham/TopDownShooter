@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://28bxiahlly06" path="res://assets/Map/tilesheet_complete.png" id="3_4wyf3"]
 [ext_resource type="PackedScene" uid="uid://bk43twcsny0hr" path="res://scenes/ui.tscn" id="4_k0juu"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xbask"]
+size = Vector2(271.5, 21.071428)
+
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_qfnet"]
 vertices = PackedVector2Array(19.476563, 32, -19.476563, 32, -17.78125, -18.625, 20.039063, 20.320313, 32, -19.195313, 32, 18.625)
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(3, 2, 4, 5)])
@@ -1137,6 +1140,22 @@ sources/5 = SubResource("TileSetAtlasSource_k0juu")
 [node name="World" type="Node2D" unique_id=194227116]
 script = ExtResource("1_71j4m")
 
+[node name="Counter" type="Area2D" parent="." unique_id=307599626]
+position = Vector2(420, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Counter" unique_id=1754830008]
+position = Vector2(-93, 203)
+scale = Vector2(1.0751032, 21.023455)
+shape = SubResource("RectangleShape2D_xbask")
+
+[node name="TerSpawn" type="Area2D" parent="." unique_id=687435550]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TerSpawn" unique_id=2023606573]
+position = Vector2(-375.75, 93.49998)
+scale = Vector2(1, 30.8)
+shape = SubResource("RectangleShape2D_xbask")
+debug_color = Color(0.72873336, 0.46726608, 0.23344517, 0.41960785)
+
 [node name="Player" parent="." unique_id=124077518 instance=ExtResource("1_nnsk1")]
 position = Vector2(440, 6)
 rotation = -2.8727605
@@ -1146,11 +1165,11 @@ position = Vector2(-1, -3)
 position_smoothing_enabled = true
 rotation_smoothing_enabled = true
 
-[node name="Bot2" parent="." unique_id=259205109 instance=ExtResource("2_rwgxs")]
+[node name="Bot2" parent="." unique_id=259205109 groups=["enemies"] instance=ExtResource("2_rwgxs")]
 position = Vector2(-117, -239)
 rotation = -0.1933572
 
-[node name="Bot" parent="." unique_id=1303433912 instance=ExtResource("2_rwgxs")]
+[node name="Bot" parent="." unique_id=1303433912 groups=["enemies"] instance=ExtResource("2_rwgxs")]
 position = Vector2(-372, 36)
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=441631387]
@@ -1162,4 +1181,4 @@ tile_set = SubResource("TileSet_xbask")
 [node name="UI" parent="." unique_id=506577777 instance=ExtResource("4_k0juu")]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=492888967]
-color = Color(0, 0, 0, 1)
+color = Color(0.7581918, 0.7581918, 0.7581917, 1)
