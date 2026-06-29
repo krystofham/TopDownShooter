@@ -39,6 +39,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.44313726, 0, 0.023529412, 0.32156864)
+color = Color(0.2899432, 0.47754407, 0.3981243, 0.32156864)
 
 [connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]

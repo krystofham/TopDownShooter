@@ -56,7 +56,7 @@ metadata/_snap_enabled = true
 script = ExtResource("1_cwism")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=371289896]
-position = Vector2(-7.8478765, -0.5)
+position = Vector2(-6, -2.9802322e-08)
 scale = Vector2(1.0434846, 0.8854064)
 shape = SubResource("CapsuleShape2D_qlg0r")
 
@@ -82,3 +82,7 @@ show_behind_parent = true
 position = Vector2(-4.999998, 0.50000036)
 scale = Vector2(1.1111112, 1.138889)
 texture = ExtResource("7_bf32g")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1907023422]
+debug_enabled = true
+debug_path_custom_color = Color(0, 1, 1, 1)

@@ -1,10 +1,10 @@
 extends CharacterBody2D
 
 const SPEED = 200.0
-const FIRE_RATE = [0.08, 0.2]
+const FIRE_RATE = [0.07, 0.2]
 const GUN_ROTATION = [8, 10]
 const DMG = [10, 20]
-const MAX_AMO = [20, 5]
+const MAX_AMO = [20, 10]
 const MUZZLE_FLASH_TIME = 0.03
 var health = 100
 var amo = [20, 5]
