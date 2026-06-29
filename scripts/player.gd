@@ -3,9 +3,10 @@ extends CharacterBody2D
 const SPEED = 200.0
 const FIRE_RATE = [0.07, 0.2]
 const GUN_ROTATION = [8, 10]
-const DMG = [10, 20]
+const DMG = [10, 21]
 const MAX_AMO = [20, 10]
 const MUZZLE_FLASH_TIME = 0.03
+const WEAPON_SWTICH_TIME = 0.3
 var health = 100
 var amo = [20, 10]
 var is_reloading = false
@@ -13,12 +14,14 @@ var guns = ["primary", "secondary"]
 var active_gun = "primary"
 var active_amo = 20
 var rounds = 3
+var is_playing_footstep = false
 var can_shoot = true
 # Odkazy na uzly
 @onready var gun_ray = $GunRay
 @onready var muzzle_flash = $MuzzleFlash
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var shoot_sound = $ShootSound
+@onready var walk_sound = $Walk
 @onready var laser_line = $Line2D
 @onready var ui = get_node("../UI") 
 
@@ -37,7 +40,13 @@ func safe_get_tree():
 
 func _physics_process(delta):
 	# 1. Pohyb hráče
-	var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")    
+	var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")  
+	if input_dir and not is_playing_footstep:
+		is_playing_footstep = true
+		walk_sound.pitch_scale = randf_range(0.9, 1.1)
+		walk_sound.play()
+		await walk_sound.finished
+		is_playing_footstep = false
 	velocity = input_dir.normalized() * SPEED
 	move_and_slide()
 	
@@ -74,18 +83,19 @@ func _handle_shooting():
 		var inverse_index = 1 if active_gun == "primary" else 0
 		if amo[inverse_index] < 2:
 			reload() 
-			return
 		else:
+			var tree = safe_get_tree()
+			if tree:
+				can_shoot = false # Dočasně vypneme střelbu během přepínání
+				await tree.create_timer(WEAPON_SWTICH_TIME).timeout
+				can_shoot = true
 			_handle_weapon_switch()
+		return # Tímto zajistíme, že se shoot() nespustí!
 
-	# Spustíme samotný výstřel (odečtení nábojů, zvuk, raycast)
+	# Spustíme samotný výstřel
 	shoot()
-	
-	# Aplikace Recoilu (posun myši)
 	_apply_recoil()
-	# Aktivace cooldownu zbraně
 	_start_fire_cooldown()
-
 
 # Časovač mezi výstřely
 func _start_fire_cooldown():

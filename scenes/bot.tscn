@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://5h5t2jsqdt3h" path="res://assets/MAP, PERSON/Hitman 1/hitman1_stand.png" id="4_bf32g"]
 [ext_resource type="AudioStream" uid="uid://b3cdnbaewf4ee" path="res://assets/sounds/voice of gun.wav" id="6_ntuq6"]
 [ext_resource type="Texture2D" uid="uid://3ht38owv8ypu" path="res://assets/circles/enemycircle.png" id="7_bf32g"]
+[ext_resource type="AudioStream" uid="uid://dbrp7pfivg50f" path="res://assets/sounds/walk.wav" id="8_px7s3"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
 radius = 8.0
@@ -73,9 +74,8 @@ script = ExtResource("3_hhacj")
 [node name="ShootSound" type="AudioStreamPlayer2D" parent="." unique_id=559482655]
 position = Vector2(24, 6)
 stream = ExtResource("6_ntuq6")
-volume_db = 2.0
-max_distance = 1200.0
-attenuation = 2.3784142
+max_distance = 1120.0
+attenuation = 2.143548
 
 [node name="Circle" type="Sprite2D" parent="." unique_id=2023973907]
 show_behind_parent = true
@@ -84,5 +84,9 @@ scale = Vector2(1.1111112, 1.138889)
 texture = ExtResource("7_bf32g")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1907023422]
-debug_enabled = true
 debug_path_custom_color = Color(0, 1, 1, 1)
+
+[node name="Walk" type="AudioStreamPlayer2D" parent="." unique_id=637705193]
+stream = ExtResource("8_px7s3")
+max_distance = 965.0
+attenuation = 2.000001

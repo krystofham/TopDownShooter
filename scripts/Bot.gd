@@ -6,13 +6,14 @@ const MAX_AMO = 15
 var amo = 15
 var is_reloading = false 
 var player_spotted = false
+var is_playing_footstep = false
 
 @onready var player = get_node("../Player")
 @onready var muzzle_flash = $MuzzleFlash
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var shoot_sound = $ShootSound
 @onready var nav_agent = $NavigationAgent2D
-
+@onready var walk_sound = $Walk
 signal request_action(action_name)
 
 const DIST_ATTACK = 100.0  
@@ -23,7 +24,7 @@ var random_dir = Vector2.ZERO
 var change_dir_timer = 0.0
 const SPREAD = 5
 var fire_rate = 0.4      
-var shoot_timer = 0.0      
+var shoot_timer = 0.2    
 const BOT_DAMAGE = 15
 const RELOAD_TIME = 1.5
 var last_seen_player
@@ -68,9 +69,15 @@ func update_state():
 		
 	if bomb_planted:
 		current_state = "DETONATING"
-		
+func _play_footstep_asynch():
+	is_playing_footstep = true
+	walk_sound.play()
+	await walk_sound.finished
+	is_playing_footstep = false
 func _physics_process(delta):
 	if player:
+		if velocity != Vector2.ZERO and not is_playing_footstep:
+			_play_footstep_asynch()
 		update_state()
 		var distance = global_position.distance_to(player.global_position)
 		var direction = Vector2.ZERO

@@ -9,6 +9,7 @@
 [ext_resource type="AudioStream" uid="uid://b3cdnbaewf4ee" path="res://assets/sounds/voice of gun.wav" id="6_tuyoq"]
 [ext_resource type="Texture2D" uid="uid://cl8ht8ua1hhlm" path="res://assets/battery_person.png" id="8_ur7pv"]
 [ext_resource type="Texture2D" uid="uid://fffh1wahct04" path="res://assets/battery.png" id="9_y4r1p"]
+[ext_resource type="AudioStream" uid="uid://dbrp7pfivg50f" path="res://assets/sounds/walk.wav" id="10_y4r1p"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
 radius = 9.0
@@ -115,3 +116,8 @@ energy = 1.9
 shadow_enabled = true
 texture = ExtResource("8_ur7pv")
 texture_scale = 0.4
+
+[node name="Walk" type="AudioStreamPlayer2D" parent="." unique_id=531168565]
+stream = ExtResource("10_y4r1p")
+max_distance = 200.0
+attenuation = 4.756826
