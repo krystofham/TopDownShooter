@@ -8,11 +8,50 @@ var rank_asset_path: String = "res://assets/ranks/silver2.png"
 var current_mode: String = "casual"
 const CONFIG_FILE_PATH = "user://savegame.cfg"
 
+
+var bot_speed: float = 120.0
+var bot_dist_attack: float = 100.0
+var bot_dist_chase: float = 180.0
+var bot_spread: float = 5.0
+var bot_fire_rate: float = 0.4
+var bot_damage: int = 15
+var bot_reload_time: float = 1.5
+var bot_change_dir_time: float = 0.2
+
+func update_bot_difficulty():
+	# Pokud je casual, boti simulují přesný střed (Silver 2/3 = cca 650 ELO)
+	var effective_elo = elo if current_mode == "ranked" else 650
+	
+	var clamped_elo = clampi(effective_elo, 0, 2000)
+	
+	# Normalizujeme ELO na hodnotu od 0.0 do 1.0
+	var t = float(clamped_elo) / 2000.0
+	
+	# LOGARITMICKÉ / MOCNINNÉ ZAKŘIVENÍ (Cubic Ease-Out)
+	# Tento faktor pro nízké ELO roste velmi rychle, takže už na ELO 600-700 
+	# dosáhne optimálních hodnot, které pak plynule stoupají dál.
+	var factor = 1.0 - pow(1.0 - t, 3)
+
+	# --- PÁROVÁNÍ HODNOT (Při ELO ~650 odpovídá tvým původním hodnotám) ---
+	bot_speed           = lerp(95.0, 155.0, factor)       
+	bot_damage          = int(lerp(11.0, 22.0, factor))      
+	bot_reload_time     = lerp(2.2, 0.6, factor)           
+	
+	bot_spread          = lerp(11.0, 1.2, factor)           
+	bot_fire_rate       = lerp(0.65, 0.18, factor)          
+	
+	bot_dist_attack     = lerp(130.0, 70.0, factor)         
+	bot_dist_chase      = lerp(140.0, 230.0, factor)        
+	
+	bot_change_dir_time = lerp(0.65, 0.12, factor)        
+
+	print("--- BOTI UPGRADOVÁNI PRO ELO ", clamped_elo, " (Faktor: ", snapped(factor, 0.01), ") ---")
+	print("Speed: ", snapped(bot_speed, 0.01), " | Spread: ", snapped(bot_spread, 0.01), " | FireRate: ", snapped(bot_fire_rate, 0.01), " | Damage: ", bot_damage)
 func _ready():
 	# Hned při zapnutí hry načteme data z disku
 	load_system_config()
-	# Podle načteného ELO spočítáme správný rank a ikonu
 	calculate_rank()
+	update_bot_difficulty()
 
 # --- UKLÁDÁNÍ A NAČÍTÁNÍ (ZÁPIS NA DISK JEN KDYŽ JE TO NUTNÉ) ---
 
@@ -80,7 +119,7 @@ func calculate_rank():
 func start_match(mode: String, map_path: String):
 	current_mode = mode
 	print("ModeManager: Startuju mod: ", current_mode)
-	
+	update_bot_difficulty()
 	if has_node("/root/GameManager"):
 		if current_mode == "ranked":
 			get_node("/root/GameManager").init_match(24, current_mode, map_path)

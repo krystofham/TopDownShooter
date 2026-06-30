@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 var health = 100
-const SPEED = 120.0
+var SPEED = 120.0
 const MAX_AMO = 15
 var amo = 15
 var is_reloading = false 
@@ -19,17 +19,17 @@ var is_playing_footstep = false
 
 signal request_action(action_name)
 
-const DIST_ATTACK = 100.0  
-const DIST_CHASE = 180.0
+var DIST_ATTACK = 100.0  
+var DIST_CHASE = 180.0
 var current_state = "CHASING"
 
 var random_dir = Vector2.ZERO
 var change_dir_timer = 0.2
-const SPREAD = 5
+var SPREAD = 5
 var fire_rate = 0.4      
 var shoot_timer = 0.2    
-const BOT_DAMAGE = 15
-const RELOAD_TIME = 1.5
+var BOT_DAMAGE = 15
+var RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
 
@@ -45,7 +45,21 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 			return false
 			
 	return true
+func apply_rank_difficulty():
+	if has_node("/root/ModeManager"):
+		var manager = get_node("/root/ModeManager")
+		
+		SPEED = manager.bot_speed
+		DIST_ATTACK = manager.bot_dist_attack
+		DIST_CHASE = manager.bot_dist_chase
+		SPREAD = manager.bot_spread
+		fire_rate = manager.bot_fire_rate
+		BOT_DAMAGE = manager.bot_damage
+		RELOAD_TIME = manager.bot_reload_time		
+	else:
+		print("ModeManager nenalezen, bot běží na defaultu.")
 func _ready():
+	apply_rank_difficulty()
 	await get_tree().physics_frame
 	
 	var random_pos = get_random_position_in_zone()
@@ -153,7 +167,8 @@ func _physics_process(delta):
 			
 		elif current_state == "EVADING":
 			change_dir_timer += delta
-			if change_dir_timer > 0.5:
+			var max_evade_time = get_node("/root/ModeManager").bot_change_dir_time if has_node("/root/ModeManager") else 0.5
+			if change_dir_timer > max_evade_time:
 				random_dir = (self.global_position - player.global_position).normalized().rotated(randf_range(PI/-6, PI/6))
 				change_dir_timer = 0.0
 			else:
@@ -172,7 +187,8 @@ func _physics_process(delta):
 			
 			if not found:
 				change_dir_timer += delta
-				if change_dir_timer > 1.5 or nav_agent.is_navigation_finished():
+				var max_patrol_time = (get_node("/root/ModeManager").bot_change_dir_time * 3.0) if has_node("/root/ModeManager") else 1.5
+				if change_dir_timer > max_patrol_time or nav_agent.is_navigation_finished():
 					change_dir_timer = 0.0
 					patrol_dir = patrol_dir.rotated(randf_range(PI/-4, PI/4)).normalized()
 					var target_position = global_position + patrol_dir * 250.0
