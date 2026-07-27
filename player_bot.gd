@@ -14,7 +14,7 @@ var is_playing_footstep = false
 @onready var shoot_sound = $ShootSound
 @onready var nav_agent = $NavigationAgent2D
 @onready var walk_sound = $Walk
-@onready var spawn_zone = get_node("../TerSpawn")
+@onready var spawn_zone = get_node("../CounterSpawn")
 
 
 signal request_action(action_name)
@@ -33,10 +33,9 @@ var RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
 
+### Používá coop nodes in group
 func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
-
-	var other_bots = get_tree().get_nodes_in_group("enemies")
-	
+	var other_bots = get_tree().get_nodes_in_group("coop")
 	for bot in other_bots:
 		if bot == self: 
 			continue 
@@ -45,6 +44,8 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 			return false
 			
 	return true
+	
+### Stejná funkce jako u bota, není důvod měnit
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
@@ -58,12 +59,13 @@ func apply_rank_difficulty():
 		RELOAD_TIME = manager.bot_reload_time		
 	else:
 		print("ModeManager nenalezen, bot běží na defaultu.")
+
 func _ready():
 	apply_rank_difficulty()
 	await get_tree().physics_frame
 	
 	var random_pos = get_random_position_in_zone()
-	var max_attempts = 15 # Maximální počet pokusů pro nalezení místa, aby se hra nezasekla v nekonečné smyčce
+	var max_attempts = 15
 	var min_distance_between_bots = 80.0
 	for attempt in range(max_attempts):
 		var potential_pos = get_random_position_in_zone()
@@ -108,26 +110,26 @@ func get_random_position_in_zone() -> Vector2:
 	var local_random_pos = Vector2(random_x, random_y)
 	return shape_node.global_position + local_random_pos
 
-func can_see_player() -> bool:
-	if not player:
-		return false
+### Funkce která se liší zásadně od BOTA.
+func can_see_enemies() -> bool:
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	for x in enemies:
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsRayQueryParameters2D.create(global_position, player.global_position)
+		query.exclude = [self] 
 		
-	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(global_position, player.global_position)
-	query.exclude = [self] 
-	
-	var result = space_state.intersect_ray(query)
-	
-	if result:
-		if result.collider == player:
-			return true
+		var result = space_state.intersect_ray(query)
+		
+		if result:
+			if result.collider == player:
+				return true
 			
 	return false
 
 func update_state():
 	var bomb_planted = false
 	var distance = global_position.distance_to(player.global_position)
-	var bot_visible = can_see_player()
+	var bot_visible = can_see_enemies()
 	
 	if bot_visible:
 		if current_state == "PATROLLING":
@@ -149,7 +151,7 @@ func _play_footstep_asynch():
 	walk_sound.play()
 	await walk_sound.finished
 	is_playing_footstep = false
-### Rebuild needed due to CT added. For loop is enough 
+### Nutnost změnit.
 func _physics_process(delta):
 	if player:
 		if velocity != Vector2.ZERO and not is_playing_footstep:
@@ -157,7 +159,7 @@ func _physics_process(delta):
 		update_state()
 		var distance = global_position.distance_to(player.global_position)
 		var direction = Vector2.ZERO
-		
+		#
 		if current_state == "CHASING":
 			look_at(player.global_position)
 			last_seen_player = player.global_position
@@ -217,7 +219,7 @@ func _physics_process(delta):
 		
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
-			if distance < 500.0 and not is_reloading and can_see_player():
+			if distance < 500.0 and not is_reloading and can_see_enemies():
 				bot_shoot()
 				shoot_timer = 0.0
 

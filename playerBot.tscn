@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://yuqq8f2emk1m"]
+
+[ext_resource type="Script" uid="uid://bcn1p75cmm7re" path="res://player_bot.gd" id="1_vgyc2"]
+[ext_resource type="Texture2D" uid="uid://tnw0afwdn5cf" path="res://assets/MAP, PERSON/Hitman 1/hitman1_machine.png" id="2_cyayo"]
+[ext_resource type="Texture2D" uid="uid://c7jfv0238wn0p" path="res://assets/MAP, PERSON/Hitman 1/hitman1_reload.png" id="3_gml8g"]
+[ext_resource type="Texture2D" uid="uid://5h5t2jsqdt3h" path="res://assets/MAP, PERSON/Hitman 1/hitman1_stand.png" id="4_6lm2c"]
+[ext_resource type="Script" uid="uid://bu6jli7rygbes" path="res://scripts/muzzle_flash.gd" id="5_iihhv"]
+[ext_resource type="AudioStream" uid="uid://b3cdnbaewf4ee" path="res://assets/sounds/voice of gun.wav" id="6_p7pjl"]
+[ext_resource type="Texture2D" uid="uid://3ht38owv8ypu" path="res://assets/circles/enemycircle.png" id="7_g6ri5"]
+[ext_resource type="AudioStream" uid="uid://dbrp7pfivg50f" path="res://assets/sounds/walk.wav" id="8_i22me"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qlg0r"]
+radius = 8.0
+height = 32.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qpkb6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_cyayo")
+}],
+"loop": 1,
+"name": &"Machine",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_gml8g")
+}],
+"loop": 1,
+"name": &"Reload",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_6lm2c")
+}],
+"loop": 1,
+"name": &"Standing",
+"speed": 5.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_hhacj"]
+offsets = PackedFloat32Array(0, 0.7409639, 1)
+colors = PackedColorArray(0.7460887, 0.7551912, 3.85046e-07, 1, 0.84704137, 0.8525248, 0.3975906, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_xbask"]
+gradient = SubResource("Gradient_hhacj")
+width = 11
+height = 6
+fill = 1
+fill_from = Vector2(0, 0.5021739)
+fill_to = Vector2(0.98260874, 0.45434782)
+metadata/_snap_enabled = true
+
+[node name="playerBot" type="CharacterBody2D" unique_id=259205109]
+collision_layer = 4
+script = ExtResource("1_vgyc2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=371289896]
+position = Vector2(-6, -2.9802322e-08)
+shape = SubResource("CapsuleShape2D_qlg0r")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=189997935]
+scale = Vector2(0.75, 0.75)
+sprite_frames = SubResource("SpriteFrames_qpkb6")
+animation = &"Machine"
+
+[node name="MuzzleFlash" type="Sprite2D" parent="." unique_id=806657262]
+position = Vector2(23, 7)
+texture = SubResource("GradientTexture2D_xbask")
+script = ExtResource("5_iihhv")
+
+[node name="ShootSound" type="AudioStreamPlayer2D" parent="." unique_id=559482655]
+position = Vector2(24, 6)
+stream = ExtResource("6_p7pjl")
+max_distance = 1120.0
+attenuation = 2.143548
+
+[node name="Circle" type="Sprite2D" parent="." unique_id=2023973907]
+show_behind_parent = true
+position = Vector2(-4.999998, 0.50000036)
+scale = Vector2(1.1111112, 1.138889)
+texture = ExtResource("7_g6ri5")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1907023422]
+debug_path_custom_color = Color(0, 1, 1, 1)
+
+[node name="Walk" type="AudioStreamPlayer2D" parent="." unique_id=637705193]
+stream = ExtResource("8_i22me")
+max_distance = 965.0
+attenuation = 2.000001

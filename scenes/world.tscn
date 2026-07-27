@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bk43twcsny0hr" path="res://scenes/ui.tscn" id="4_k0juu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xbask"]
-size = Vector2(279.5, 21.071428)
+size = Vector2(288.57294, 22.712591)
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_qfnet"]
 vertices = PackedVector2Array(19.476563, 32, -19.476563, 32, -17.78125, -18.625, 20.039063, 20.320313, 32, -19.195313, 32, 18.625)
@@ -1140,13 +1140,13 @@ sources/5 = SubResource("TileSetAtlasSource_k0juu")
 [node name="World" type="Node2D" unique_id=194227116]
 script = ExtResource("1_71j4m")
 
-[node name="Counter" type="Area2D" parent="." unique_id=307599626]
+[node name="CounterSpawn" type="Area2D" parent="." unique_id=307599626]
 position = Vector2(420, 0)
 collision_layer = 0
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Counter" unique_id=1754830008]
-position = Vector2(-93, 203)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CounterSpawn" unique_id=1754830008]
+position = Vector2(-97.87717, 185.74855)
 scale = Vector2(1.0751032, 21.023455)
 shape = SubResource("RectangleShape2D_xbask")
 

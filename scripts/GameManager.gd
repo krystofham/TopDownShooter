@@ -1,5 +1,7 @@
 extends Node
 
+signal score_changed(team_a_score: int, team_b_score: int)
+
 # --- PARAMETRY AKTUÁLNÍHO ZÁPASU (V PAMĚTI) ---
 var match_max_rounds: int = 15
 var current_game_mode: String = "casual"
@@ -47,7 +49,7 @@ func register_round_results(round_won: bool, round_kills: int, player_died: bool
 	else:
 		score_team_b += 1
 		print("Kolo vyhráli Boti. Stav zápasu: ", score_team_a, ":", score_team_b)
-		
+	score_changed.emit(score_team_a, score_team_b)
 	# Výpočet podmínky pro absolutní vítězství v zápase (např. v Casualu stačí 8 bodů z 15)
 	var win_condition = (match_max_rounds / 2) + 1
 	

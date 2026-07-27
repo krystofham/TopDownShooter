@@ -24,7 +24,7 @@ var can_shoot = true
 @onready var walk_sound = $Walk
 @onready var laser_line = $Line2D
 @onready var ui = get_node("../UI") 
-@onready var spawn_zone = get_node("../Counter") 
+@onready var spawn_zone = get_node("../CounterSpawn") 
 
 signal request_action(action_name)
 
@@ -204,8 +204,6 @@ func take_damage(amount):
 	if ui:
 		ui.update_health(health)
 	if health <= 0:
-		if ui:
-			ui.update_teams(0, 1)
 		round_over()
 func round_over():
 	emit_signal("request_action", "player_dead")

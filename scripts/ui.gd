@@ -3,7 +3,7 @@ extends CanvasLayer
 @onready var health_bar = $HUD/HealthBar
 @onready var amo_label = $HUD/AmoLabel
 @onready var time_label = $HUD/TimeLabel
-@onready var team_label = $HUD/TeamLabel
+@onready var score_label = $HUD/ScoreLabel
 const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
 
 var time_elapsed = 100.0
@@ -11,7 +11,8 @@ var time_elapsed = 100.0
 func _ready():
 	health_bar.max_value = 100
 	health_bar.value = 100
-	update_teams(1, 1) # Na začátku 1 hráč a 1 bot
+	GameManager.score_changed.connect(update_score)
+	update_score(GameManager.score_team_a, GameManager.score_team_b)
 	update_amo([20, 10], [20, 10], "primary") # Hned na startu ukážeme plný zásobník
 
 func _process(delta):
@@ -43,10 +44,8 @@ func update_time_display():
 	if minutes == 0 and seconds == 0:
 		game_over()
 
-# Funkce pro výpis počtu živých hráčů na stranách (styl CS)
-func update_teams(players_alive: int, bots_alive: int):
-	team_label.text = "Counter: " + str(players_alive) + " | Terrorist: " + str(bots_alive)
-
+func update_score(counter_score: int, terr_score: int):
+	score_label.text = "Counter: " + str(counter_score) + " | Terrorist: " + str(terr_score)
 func game_over():
 	var game_over_instance = GAME_OVER_MENU_SCENE.instantiate()
 	get_tree().current_scene.add_child(game_over_instance)
