@@ -14,6 +14,9 @@ var score_team_a: int = 0 # Tým hráče
 var score_team_b: int = 0 # Tým botů
 var current_round_number: int = 1
 
+
+
+
 # Volá se z ModeManageru před spuštěním samotné hry
 func init_match(max_rounds: int, mode: String, map_path: String):
 	match_max_rounds = max_rounds

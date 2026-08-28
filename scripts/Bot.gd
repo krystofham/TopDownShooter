@@ -48,7 +48,6 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
-		
 		SPEED = manager.bot_speed
 		DIST_ATTACK = manager.bot_dist_attack
 		DIST_CHASE = manager.bot_dist_chase

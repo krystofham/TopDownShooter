@@ -49,7 +49,6 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
-		
 		SPEED = manager.bot_speed
 		DIST_ATTACK = manager.bot_dist_attack
 		DIST_CHASE = manager.bot_dist_chase
@@ -74,17 +73,17 @@ func _ready():
 			
 		if is_position_far_enough(potential_pos, min_distance_between_bots):
 			random_pos = potential_pos
-			break # Našli jsme dobré místo, ukončíme hledání
+			break # Správné místo
 			
 	# Záložní plán: pokud nenašel ideální volné místo po X pokusech, vezme jakékoliv náhodné v zóně
 	if random_pos == Vector2.ZERO:
 		random_pos = get_random_position_in_zone()
+	var random_enemy_bot = get_tree().get_nodes_in_group("enemies").pick_random()
 	if random_pos != Vector2.ZERO:
 		nav_agent.target_position = random_pos
 		global_position = random_pos
-	elif player:
-		# Záložní plán: pokud zóna neexistuje, jdi po hráči
-		nav_agent.target_position = player.global_position
+	# pokud zóna neexistuje, jdi po botech
+	nav_agent.target_position = random_enemy_bot.global_position
 
 
 func get_random_position_in_zone() -> Vector2:
@@ -111,27 +110,35 @@ func get_random_position_in_zone() -> Vector2:
 	return shape_node.global_position + local_random_pos
 
 ### Funkce která se liší zásadně od BOTA.
-func can_see_enemies() -> bool:
-	var enemies = get_tree().get_nodes_in_group("enemies")
-	for x in enemies:
-		var space_state = get_world_2d().direct_space_state
-		var query = PhysicsRayQueryParameters2D.create(global_position, player.global_position)
-		query.exclude = [self] 
-		
-		var result = space_state.intersect_ray(query)
-		
-		if result:
-			if result.collider == player:
-				return true
+func can_see_enemies(closest_enemy) -> bool:
+	var space_state = get_world_2d().direct_space_state
+	var query = PhysicsRayQueryParameters2D.create(global_position, closest_enemy.global_position)
+	query.exclude = [self] 
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		if result.collider == closest_enemy:
+			return true
 			
 	return false
-
+func get_closest_enemy(enemies, position):
+	var distance = INF
+	var closest_enemy
+	for enemy in enemies:
+		var new_dist = position.distance_to(enemy.position)
+		if new_dist > distance:
+			distance = new_dist
+			closest_enemy = enemy
+	return closest_enemy
 func update_state():
 	var bomb_planted = false
-	var distance = global_position.distance_to(player.global_position)
-	var bot_visible = can_see_enemies()
-	
-	if bot_visible:
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	var closest_enemy = get_closest_enemy(enemies, position)
+	var distance = global_position.distance_to(closest_enemy.global_position)
+	var enemy_visible = can_see_enemies(closest_enemy)
+
+	if enemy_visible:
 		if current_state == "PATROLLING":
 			current_state = "CHASING"
 		
@@ -161,9 +168,11 @@ func _physics_process(delta):
 		var direction = Vector2.ZERO
 		#
 		if current_state == "CHASING":
+			# EHM
 			look_at(player.global_position)
 			last_seen_player = player.global_position
 			nav_agent.target_position = player.global_position
+			# EHM konec
 			
 			var next_path_position = nav_agent.get_next_path_position()
 			direction = (next_path_position - global_position).normalized()
@@ -219,7 +228,9 @@ func _physics_process(delta):
 		
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
-			if distance < 500.0 and not is_reloading and can_see_enemies():
+			var enemies = get_tree().get_nodes_in_group("enemies")
+			var closest_enemy = get_closest_enemy(enemies, position)
+			if distance < 500.0 and not is_reloading and can_see_enemies(closest_enemy):
 				bot_shoot()
 				shoot_timer = 0.0
 
