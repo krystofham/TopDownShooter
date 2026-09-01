@@ -1160,7 +1160,7 @@ scale = Vector2(1, 30.8)
 shape = SubResource("RectangleShape2D_xbask")
 debug_color = Color(0.72873336, 0.46726608, 0.23344517, 0.41960785)
 
-[node name="Player" parent="." unique_id=124077518 instance=ExtResource("1_nnsk1")]
+[node name="Player" parent="." unique_id=124077518 groups=["coop"] instance=ExtResource("1_nnsk1")]
 position = Vector2(440, 6)
 rotation = -2.8727605
 

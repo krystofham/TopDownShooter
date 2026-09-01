@@ -8,7 +8,6 @@ var is_reloading = false
 var player_spotted = false
 var is_playing_footstep = false
 
-@onready var player = get_node("../Player")
 @onready var muzzle_flash = $MuzzleFlash
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var shoot_sound = $ShootSound
@@ -22,7 +21,7 @@ signal request_action(action_name)
 var DIST_ATTACK = 100.0  
 var DIST_CHASE = 180.0
 var current_state = "CHASING"
-
+var enemy
 var random_dir = Vector2.ZERO
 var change_dir_timer = 0.2
 var SPREAD = 5
@@ -127,7 +126,7 @@ func get_closest_enemy(enemies, position):
 	var closest_enemy
 	for enemy in enemies:
 		var new_dist = position.distance_to(enemy.position)
-		if new_dist > distance:
+		if new_dist < distance:
 			distance = new_dist
 			closest_enemy = enemy
 	return closest_enemy
@@ -158,22 +157,27 @@ func _play_footstep_asynch():
 	walk_sound.play()
 	await walk_sound.finished
 	is_playing_footstep = false
-### Nutnost změnit.
+
 func _physics_process(delta):
-	if player:
+	if !enemy:
+		var other_bots = get_tree().get_nodes_in_group("enemies")
+		enemy = other_bots[randi() % other_bots.size()] # redidt petepete1984
+		for e in other_bots:
+			look_at(e)
+			if e.is_visible_in_tree():
+				enemy = e
+				break
+		if !enemy: return
+	else:
 		if velocity != Vector2.ZERO and not is_playing_footstep:
 			_play_footstep_asynch()
 		update_state()
-		var distance = global_position.distance_to(player.global_position)
+		var distance = global_position.distance_to(enemy.global_position)
 		var direction = Vector2.ZERO
-		#
 		if current_state == "CHASING":
-			# EHM
-			look_at(player.global_position)
-			last_seen_player = player.global_position
-			nav_agent.target_position = player.global_position
-			# EHM konec
-			
+			look_at(enemy.global_position)
+			last_seen_player = enemy.global_position
+			nav_agent.target_position = enemy.global_position			
 			var next_path_position = nav_agent.get_next_path_position()
 			direction = (next_path_position - global_position).normalized()
 			
@@ -181,11 +185,10 @@ func _physics_process(delta):
 			change_dir_timer += delta
 			var max_evade_time = get_node("/root/ModeManager").bot_change_dir_time if has_node("/root/ModeManager") else 0.5
 			if change_dir_timer > max_evade_time:
-				random_dir = (self.global_position - player.global_position).normalized().rotated(randf_range(PI/-6, PI/6))
+				random_dir = (self.global_position - enemy.global_position).normalized().rotated(randf_range(PI/-6, PI/6))
 				change_dir_timer = 0.0
 			else:
-				random_dir = (self.global_position - player.global_position).normalized()
-			
+				random_dir = (self.global_position - enemy.global_position).normalized()
 			direction = random_dir
 			
 		elif current_state == "PATROLLING":
@@ -196,7 +199,6 @@ func _physics_process(delta):
 				else: 
 					nav_agent.target_position = last_seen_player
 					found = true
-			
 			if not found:
 				change_dir_timer += delta
 				var max_patrol_time = (get_node("/root/ModeManager").bot_change_dir_time * 3.0) if has_node("/root/ModeManager") else 1.5
@@ -211,10 +213,6 @@ func _physics_process(delta):
 			
 			if direction != Vector2.ZERO:
 				look_at(global_position + direction) 
-				
-		elif current_state == "DETONATING":
-			pass
-				
 		if is_reloading:
 			if animated_sprite.animation != "Reload":
 				animated_sprite.play("Reload")
@@ -234,6 +232,7 @@ func _physics_process(delta):
 				bot_shoot()
 				shoot_timer = 0.0
 
+### PŘIDAT STATE RELOADING
 func start_reload():
 	is_reloading = true
 	await get_tree().create_timer(RELOAD_TIME).timeout
@@ -257,20 +256,20 @@ func bot_shoot():
 	get_tree().create_timer(0.05).timeout.connect(func(): muzzle_flash.visible = false)
 	
 	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (player.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
+	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (enemy.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
 	query.exclude = [self]
 	var result = space_state.intersect_ray(query)
 	
 	if result:
 		var hit_object = result.collider
-		if hit_object == player:
-			if player.has_method("take_damage"):
-				player.take_damage(BOT_DAMAGE)
+		if hit_object == enemy:
+			if enemy.has_method("take_damage"):
+				enemy.take_damage(BOT_DAMAGE)
 
 func take_damage(amount):
 	health -= amount
 	var ui = get_node_or_null("../UI")
 	
 	if health <= 0:
-		emit_signal("request_action", "ter_dead")
+		emit_signal("request_action", "coop_dead")
 		queue_free()
