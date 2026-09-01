@@ -157,16 +157,34 @@ func _play_footstep_asynch():
 	walk_sound.play()
 	await walk_sound.finished
 	is_playing_footstep = false
+func can_see_enemy(enemy) -> bool:
+	if not enemy:
+		return false
+		
+	var space_state = get_world_2d().direct_space_state
+	var query = PhysicsRayQueryParameters2D.create(global_position, enemy.global_position)
+	query.exclude = [self] 
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		if result.collider == enemy:
+			return true
+			
+	return false
 
 func _physics_process(delta):
 	if !enemy:
 		var other_bots = get_tree().get_nodes_in_group("enemies")
-		enemy = other_bots[randi() % other_bots.size()] # redidt petepete1984
+		var dist = INF
 		for e in other_bots:
-			look_at(e)
-			if e.is_visible_in_tree():
+			if self.position.distance_to(e.position) < dist:
+				enemy = e
+				dist = self.position.distance_to(e.position)
+			if can_see_enemy(e):
 				enemy = e
 				break
+
 		if !enemy: return
 	else:
 		if velocity != Vector2.ZERO and not is_playing_footstep:

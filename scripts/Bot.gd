@@ -5,17 +5,15 @@ var SPEED = 120.0
 const MAX_AMO = 15
 var amo = 15
 var is_reloading = false 
-var player_spotted = false
 var is_playing_footstep = false
 
-@onready var player = get_node("../Player")
+@onready var enemy = get_node("../Player")
 @onready var muzzle_flash = $MuzzleFlash
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var shoot_sound = $ShootSound
 @onready var nav_agent = $NavigationAgent2D
 @onready var walk_sound = $Walk
 @onready var spawn_zone = get_node("../TerSpawn")
-
 
 signal request_action(action_name)
 
@@ -30,20 +28,18 @@ var fire_rate = 0.4
 var shoot_timer = 0.2    
 var BOT_DAMAGE = 15
 var RELOAD_TIME = 1.5
-var last_seen_player
+var last_seen_enemy
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
 
 func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
-
 	var other_bots = get_tree().get_nodes_in_group("enemies")
 	
 	for bot in other_bots:
 		if bot == self: 
 			continue 
-			
 		if bot.global_position.distance_to(pos) < min_dist:
 			return false
-			
+
 	return true
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
@@ -79,9 +75,6 @@ func _ready():
 	if random_pos != Vector2.ZERO:
 		nav_agent.target_position = random_pos
 		global_position = random_pos
-	elif player:
-		# Záložní plán: pokud zóna neexistuje, jdi po hráči
-		nav_agent.target_position = player.global_position
 
 
 func get_random_position_in_zone() -> Vector2:
@@ -89,14 +82,12 @@ func get_random_position_in_zone() -> Vector2:
 		print("Varování: Není nastavena žádná spawn_zone!")
 		return Vector2.ZERO
 		
-	# Najdeme CollisionShape2D uvnitř naší zóny
 	var shape_node = spawn_zone.get_node("CollisionShape2D") as CollisionShape2D
 	if not shape_node or not shape_node.shape is RectangleShape2D:
 		print("Chyba: Zóna musí mít RectangleShape2D!")
 		return Vector2.ZERO
 		
 	var rect_shape = shape_node.shape as RectangleShape2D
-	# Získáme poloviční velikost obdélníku (extents)
 	var extents = rect_shape.size / 2
 	
 	# Vygenerujeme náhodné X a Y v rozsahu od -extents do +extents
@@ -107,26 +98,26 @@ func get_random_position_in_zone() -> Vector2:
 	var local_random_pos = Vector2(random_x, random_y)
 	return shape_node.global_position + local_random_pos
 
-func can_see_player() -> bool:
-	if not player:
+func can_see_enemy(enemy) -> bool:
+	if not enemy:
 		return false
 		
 	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(global_position, player.global_position)
+	var query = PhysicsRayQueryParameters2D.create(global_position, enemy.global_position)
 	query.exclude = [self] 
 	
 	var result = space_state.intersect_ray(query)
 	
 	if result:
-		if result.collider == player:
+		if result.collider == enemy:
 			return true
 			
 	return false
 
 func update_state():
 	var bomb_planted = false
-	var distance = global_position.distance_to(player.global_position)
-	var bot_visible = can_see_player()
+	var distance = global_position.distance_to(enemy.global_position)
+	var bot_visible = can_see_enemy(enemy)
 	
 	if bot_visible:
 		if current_state == "PATROLLING":
@@ -148,19 +139,32 @@ func _play_footstep_asynch():
 	walk_sound.play()
 	await walk_sound.finished
 	is_playing_footstep = false
-### Rebuild needed due to CT added. For loop is enough 
+func find_enemy():
+	var other_enemies = get_tree().get_nodes_in_group("coop")
+	var dist = INF
+	var visible_enemy
+	for e in other_enemies:
+		if self.position.distance_to(e.position) < dist:
+			enemy = e
+			dist = self.position.distance_to(e.position)
+		if can_see_enemy(e):
+			enemy = e
+			break
+
+
 func _physics_process(delta):
-	if player:
+	find_enemy()
+	if enemy:
 		if velocity != Vector2.ZERO and not is_playing_footstep:
 			_play_footstep_asynch()
 		update_state()
-		var distance = global_position.distance_to(player.global_position)
+		var distance = global_position.distance_to(enemy.global_position)
 		var direction = Vector2.ZERO
 		
 		if current_state == "CHASING":
-			look_at(player.global_position)
-			last_seen_player = player.global_position
-			nav_agent.target_position = player.global_position
+			look_at(enemy.global_position)
+			last_seen_enemy = enemy.global_position
+			nav_agent.target_position = enemy.global_position
 			
 			var next_path_position = nav_agent.get_next_path_position()
 			direction = (next_path_position - global_position).normalized()
@@ -169,20 +173,20 @@ func _physics_process(delta):
 			change_dir_timer += delta
 			var max_evade_time = get_node("/root/ModeManager").bot_change_dir_time if has_node("/root/ModeManager") else 0.5
 			if change_dir_timer > max_evade_time:
-				random_dir = (self.global_position - player.global_position).normalized().rotated(randf_range(PI/-6, PI/6))
+				random_dir = (self.global_position - enemy.global_position).normalized().rotated(randf_range(PI/-6, PI/6))
 				change_dir_timer = 0.0
 			else:
-				random_dir = (self.global_position - player.global_position).normalized()
+				random_dir = (self.global_position - enemy.global_position).normalized()
 			
 			direction = random_dir
 			
 		elif current_state == "PATROLLING":
 			var found = false
-			if last_seen_player:
-				if global_position.distance_to(last_seen_player) < 50:
-					last_seen_player = null
+			if last_seen_enemy:
+				if global_position.distance_to(last_seen_enemy) < 50:
+					last_seen_enemy = null
 				else: 
-					nav_agent.target_position = last_seen_player
+					nav_agent.target_position = last_seen_enemy
 					found = true
 			
 			if not found:
@@ -216,7 +220,7 @@ func _physics_process(delta):
 		
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
-			if distance < 500.0 and not is_reloading and can_see_player():
+			if distance < 500.0 and not is_reloading and can_see_enemy(enemy):
 				bot_shoot()
 				shoot_timer = 0.0
 
@@ -243,19 +247,19 @@ func bot_shoot():
 	get_tree().create_timer(0.05).timeout.connect(func(): muzzle_flash.visible = false)
 	
 	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (player.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
+	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (enemy.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
 	query.exclude = [self]
 	var result = space_state.intersect_ray(query)
 	
 	if result:
 		var hit_object = result.collider
-		if hit_object == player:
-			if player.has_method("take_damage"):
-				player.take_damage(BOT_DAMAGE)
+		if hit_object == enemy:
+			if enemy.has_method("take_damage"):
+				enemy.take_damage(BOT_DAMAGE)
 
 func take_damage(amount):
 	health -= amount
-	var ui = get_node_or_null("../UI")
+	# var ui = get_node_or_null("../UI")
 	
 	if health <= 0:
 		emit_signal("request_action", "ter_dead")
