@@ -32,19 +32,17 @@ var RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
 
+
 ### Používá coop nodes in group
 func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 	var other_bots = get_tree().get_nodes_in_group("coop")
 	for bot in other_bots:
 		if bot == self: 
 			continue 
-			
 		if bot.global_position.distance_to(pos) < min_dist:
 			return false
-			
 	return true
 	
-### Stejná funkce jako u bota, není důvod měnit
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
@@ -54,9 +52,7 @@ func apply_rank_difficulty():
 		SPREAD = manager.bot_spread
 		fire_rate = manager.bot_fire_rate
 		BOT_DAMAGE = manager.bot_damage
-		RELOAD_TIME = manager.bot_reload_time		
-	else:
-		print("ModeManager nenalezen, bot běží na defaultu.")
+		RELOAD_TIME = manager.bot_reload_time
 
 func _ready():
 	apply_rank_difficulty()
@@ -69,47 +65,46 @@ func _ready():
 		var potential_pos = get_random_position_in_zone()
 		if potential_pos == Vector2.ZERO:
 			break
-			
 		if is_position_far_enough(potential_pos, min_distance_between_bots):
 			random_pos = potential_pos
-			break # Správné místo
-			
-	# Záložní plán: pokud nenašel ideální volné místo po X pokusech, vezme jakékoliv náhodné v zóně
+			break
+
 	if random_pos == Vector2.ZERO:
 		random_pos = get_random_position_in_zone()
-	var random_enemy_bot = get_tree().get_nodes_in_group("enemies").pick_random()
+
+	var enemies_group = get_tree().get_nodes_in_group("enemies")
+	if enemies_group.is_empty():
+		return
+
+	var random_enemy_bot = enemies_group.pick_random()
 	if random_pos != Vector2.ZERO:
 		nav_agent.target_position = random_pos
 		global_position = random_pos
-	# pokud zóna neexistuje, jdi po botech
+
 	nav_agent.target_position = random_enemy_bot.global_position
 
 
 func get_random_position_in_zone() -> Vector2:
 	if not spawn_zone:
-		print("Varování: Není nastavena žádná spawn_zone!")
 		return Vector2.ZERO
 		
-	# Najdeme CollisionShape2D uvnitř naší zóny
 	var shape_node = spawn_zone.get_node("CollisionShape2D") as CollisionShape2D
 	if not shape_node or not shape_node.shape is RectangleShape2D:
-		print("Chyba: Zóna musí mít RectangleShape2D!")
 		return Vector2.ZERO
 		
 	var rect_shape = shape_node.shape as RectangleShape2D
-	# Získáme poloviční velikost obdélníku (extents)
 	var extents = rect_shape.size / 2
 	
-	# Vygenerujeme náhodné X a Y v rozsahu od -extents do +extents
 	var random_x = randf_range(-extents.x, extents.x)
 	var random_y = randf_range(-extents.y, extents.y)
 	
-	# Přičteme globální pozici zóny, aby to fungovalo kdekoli na mapě
 	var local_random_pos = Vector2(random_x, random_y)
 	return shape_node.global_position + local_random_pos
 
 ### Funkce která se liší zásadně od BOTA.
 func can_see_enemies(closest_enemy) -> bool:
+	if not is_instance_valid(closest_enemy):
+		return false
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsRayQueryParameters2D.create(global_position, closest_enemy.global_position)
 	query.exclude = [self] 
@@ -119,23 +114,33 @@ func can_see_enemies(closest_enemy) -> bool:
 	if result:
 		if result.collider == closest_enemy:
 			return true
-			
 	return false
+
 func get_closest_enemy(enemies, position):
 	var distance = INF
 	var closest_enemy
 	for enemy in enemies:
-		var new_dist = position.distance_to(enemy.position)
+		if not is_instance_valid(enemy):
+			continue
+		var new_dist = position.distance_to(enemy.global_position)
 		if new_dist < distance:
 			distance = new_dist
 			closest_enemy = enemy
 	return closest_enemy
+
 func update_state():
 	var bomb_planted = false
 	var enemies = get_tree().get_nodes_in_group("enemies")
+	if enemies.is_empty():
+		return
 	var closest_enemy = get_closest_enemy(enemies, position)
-	var distance = global_position.distance_to(closest_enemy.global_position)
-	var enemy_visible = can_see_enemies(closest_enemy)
+	if not closest_enemy:
+		return
+	enemy = closest_enemy
+	var distance = global_position.distance_to(enemy.global_position)
+	var enemy_visible = can_see_enemies(enemy)
+
+	var old_state = current_state
 
 	if enemy_visible:
 		if current_state == "PATROLLING":
@@ -152,28 +157,31 @@ func update_state():
 		
 	if bomb_planted:
 		current_state = "DETONATING"
+
 func _play_footstep_asynch():
 	is_playing_footstep = true
 	walk_sound.play()
 	await walk_sound.finished
 	is_playing_footstep = false
-func can_see_enemy(enemy) -> bool:
-	if not enemy:
+
+func can_see_enemy(enemy_check) -> bool:
+	if not enemy_check or not is_instance_valid(enemy_check):
 		return false
 		
 	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(global_position, enemy.global_position)
+	var query = PhysicsRayQueryParameters2D.create(global_position, enemy_check.global_position)
 	query.exclude = [self] 
 	
 	var result = space_state.intersect_ray(query)
 	
 	if result:
-		if result.collider == enemy:
+		if result.collider == enemy_check:
 			return true
-			
 	return false
 
 func _physics_process(delta):
+
+
 	if not is_instance_valid(enemy) or enemy == null:
 		enemy = null
 		var other_bots = get_tree().get_nodes_in_group("enemies")
@@ -188,7 +196,8 @@ func _physics_process(delta):
 				enemy = e
 				break
 
-		if !enemy: return
+		if !enemy:
+			return
 	else:
 		if velocity != Vector2.ZERO and not is_playing_footstep:
 			_play_footstep_asynch()
@@ -265,6 +274,9 @@ func bot_shoot():
 		start_reload()
 		return
 		
+	if not is_instance_valid(enemy):
+		return
+
 	amo -= 1
 	shoot_sound.pitch_scale = randf_range(0.9, 1.1)
 	shoot_sound.volume_db = randf_range(0.9, 1.1)
@@ -282,13 +294,9 @@ func bot_shoot():
 		if hit_object == enemy:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(BOT_DAMAGE)
-				print("Player bot dealing", BOT_DAMAGE)
-			print("shooting")
 
 func take_damage(amount):
 	health -= amount
-	# var ui = get_node_or_null("../UI")
-	
 	if health <= 0:
 		emit_signal("request_action", "coop_dead")
 		queue_free()
