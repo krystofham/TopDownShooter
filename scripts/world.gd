@@ -1,8 +1,8 @@
 extends Node2D
 const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
 
-var counter =  2
-var terrorist = 2
+var counter =  5
+var terrorist = 5
 var kills = 0
 var is_killed = false
 func _ready():
@@ -10,7 +10,13 @@ func _ready():
 	$Player.request_action.connect(_on_player_request_action)
 	$Bot.request_action.connect(_on_bot_request_action)
 	$Bot2.request_action.connect(_on_bot_request_action)
+	$Bot5.request_action.connect(_on_bot_request_action)
+	$Bot4.request_action.connect(_on_bot_request_action)
+	$Bot3.request_action.connect(_on_bot_request_action)
 	$playerBot.request_action.connect(_on_playerBot_request_action)
+	$playerBot2.request_action.connect(_on_playerBot_request_action)
+	$playerBot3.request_action.connect(_on_playerBot_request_action)
+	$playerBot4.request_action.connect(_on_playerBot_request_action)
 func _on_playerBot_request_action(action_name):
 	if action_name == "coop_dead":
 		entity_died(true, true)
@@ -31,6 +37,7 @@ func entity_died(is_counter, is_killed):
 		counter -= 1
 	else: 
 		terrorist -=1
+	print("counter: ", counter, " terrorist: ", terrorist)
 	evaluate()
 func i_killed():
 	kills += 1

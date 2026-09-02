@@ -23,6 +23,7 @@ var can_shoot = true
 @onready var shoot_sound = $ShootSound
 @onready var walk_sound = $Walk
 @onready var laser_line = $Line2D
+@onready var camera = $Camera2D
 @onready var ui = get_node("../UI") 
 @onready var spawn_zone = get_node("../CounterSpawn") 
 
@@ -202,4 +203,27 @@ func take_damage(amount):
 	if health <= 0:
 		round_over()
 func round_over():
+	print("[DEBUG] round_over() spuštěno")
 	emit_signal("request_action", "player_dead")
+
+	if camera:
+		var cam_global_pos = camera.global_position
+		var old_parent = camera.get_parent()
+
+		if old_parent:
+			old_parent.remove_child(camera)
+
+		var scene_root = get_tree().current_scene
+		if scene_root:
+			scene_root.add_child(camera)
+
+		camera.global_position = cam_global_pos
+
+		camera.make_current()
+
+		var tween = create_tween()
+		tween.tween_property(camera, "zoom", Vector2(0.6, 0.6), 1.0)
+	var canvas_modulate = get_tree().current_scene.get_node_or_null("CanvasModulate")
+	if canvas_modulate:
+		canvas_modulate.color = Color(1.0, 0.3, 0.3, 1.0)
+	queue_free()

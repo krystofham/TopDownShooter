@@ -174,10 +174,13 @@ func can_see_enemy(enemy) -> bool:
 	return false
 
 func _physics_process(delta):
-	if !enemy:
+	if not is_instance_valid(enemy) or enemy == null:
+		enemy = null
 		var other_bots = get_tree().get_nodes_in_group("enemies")
 		var dist = INF
 		for e in other_bots:
+			if not is_instance_valid(e):
+				continue
 			if self.position.distance_to(e.position) < dist:
 				enemy = e
 				dist = self.position.distance_to(e.position)
@@ -244,13 +247,10 @@ func _physics_process(delta):
 		
 		shoot_timer += delta
 		if shoot_timer >= fire_rate + randf_range(-0.08, 0.08):
-			var enemies = get_tree().get_nodes_in_group("enemies")
-			var closest_enemy = get_closest_enemy(enemies, position)
-			if distance < 500.0 and not is_reloading and can_see_enemies(closest_enemy):
+			if distance < 500.0 and not is_reloading and can_see_enemies(enemy):
 				bot_shoot()
 				shoot_timer = 0.0
 
-### PŘIDAT STATE RELOADING
 func start_reload():
 	is_reloading = true
 	await get_tree().create_timer(RELOAD_TIME).timeout
@@ -277,16 +277,17 @@ func bot_shoot():
 	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (enemy.global_position - global_position).rotated(deg_to_rad(randf_range(-1*SPREAD, SPREAD))))   
 	query.exclude = [self]
 	var result = space_state.intersect_ray(query)
-	
 	if result:
 		var hit_object = result.collider
 		if hit_object == enemy:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(BOT_DAMAGE)
+				print("Player bot dealing", BOT_DAMAGE)
+			print("shooting")
 
 func take_damage(amount):
 	health -= amount
-	var ui = get_node_or_null("../UI")
+	# var ui = get_node_or_null("../UI")
 	
 	if health <= 0:
 		emit_signal("request_action", "coop_dead")
