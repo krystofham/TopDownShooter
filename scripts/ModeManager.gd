@@ -19,34 +19,45 @@ var bot_reload_time: float = 1.5
 var bot_change_dir_time: float = 0.2
 
 func update_bot_difficulty():
-	# Pokud je casual, boti simulují přesný střed (Silver 2/3 = cca 650 ELO)
+
+	# Ranked = hráčovo ELO
+	# Casual = Silver 2/3 baseline
 	var effective_elo = elo if current_mode == "ranked" else 650
-	
+
 	var clamped_elo = clampi(effective_elo, 0, 2000)
-	
-	# Normalizujeme ELO na hodnotu od 0.0 do 1.0
+
+	# 0.0 = ELO 0
+	# 1.0 = ELO 2000
 	var t = float(clamped_elo) / 2000.0
-	
-	# LOGARITMICKÉ / MOCNINNÉ ZAKŘIVENÍ (Cubic Ease-Out)
-	# Tento faktor pro nízké ELO roste velmi rychle, takže už na ELO 600-700 
-	# dosáhne optimálních hodnot, které pak plynule stoupají dál.
-	var factor = 1.0 - pow(1.0 - t, 3)
 
-	# --- PÁROVÁNÍ HODNOT (Při ELO ~650 odpovídá tvým původním hodnotám) ---
-	bot_speed           = lerp(95.0, 155.0, factor)       
-	bot_damage          = int(lerp(11.0, 22.0, factor))      
-	bot_reload_time     = lerp(2.2, 0.6, factor)           
-	
-	bot_spread          = lerp(11.0, 1.2, factor)           
-	bot_fire_rate       = lerp(0.65, 0.18, factor)          
-	
-	bot_dist_attack     = lerp(130.0, 70.0, factor)         
-	bot_dist_chase      = lerp(140.0, 230.0, factor)        
-	
-	bot_change_dir_time = lerp(0.65, 0.12, factor)        
+	# Silnější baseline + pomalejší růst na vysokém ELO.
+	# Díky tomu jsou boti lepší při stejném ELO/ranku.
+	var factor = pow(t, 0.72)
 
-	print("--- BOTI UPGRADOVÁNI PRO ELO ", clamped_elo, " (Faktor: ", snapped(factor, 0.01), ") ---")
-	print("Speed: ", snapped(bot_speed, 0.01), " | Spread: ", snapped(bot_spread, 0.01), " | FireRate: ", snapped(bot_fire_rate, 0.01), " | Damage: ", bot_damage)
+	bot_speed = lerp(115.0, 175.0, factor)
+	bot_spread = lerp(7.0, 0.8, factor)
+	bot_damage = int(lerp(14.0, 24.0, factor))
+	bot_fire_rate = lerp(0.42, 0.12, factor)
+	bot_reload_time = lerp(1.35, 0.45, factor)
+	bot_dist_attack = lerp(105.0, 65.0, factor)
+	bot_dist_chase = lerp(190.0, 260.0, factor)
+	bot_change_dir_time = lerp(0.30, 0.08, factor)
+	print(
+		"--- BOT DIFFICULTY ELO ",
+		clamped_elo,
+		" | Factor: ",
+		snapped(factor, 0.01),
+        " ---"
+	)
+
+	print(
+		"Speed: ", snapped(bot_speed, 0.01),
+		" | Spread: ", snapped(bot_spread, 0.01),
+		" | FireRate: ", snapped(bot_fire_rate, 0.01),
+		" | Damage: ", bot_damage,
+		" | Reload: ", snapped(bot_reload_time, 0.01)
+	)
+
 func _ready():
 	# Hned při zapnutí hry načteme data z disku
 	load_system_config()

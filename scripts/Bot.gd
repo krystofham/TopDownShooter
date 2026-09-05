@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-var health = 100
+var health = 200
 var SPEED = 120.0
 const MAX_AMO = 15
 var amo = 15
@@ -22,10 +22,10 @@ var DIST_CHASE = 180.0
 var current_state = "CHASING"
 
 var random_dir = Vector2.ZERO
-var change_dir_timer = 0.2
+var change_dir_timer = 0.5
 var SPREAD = 5
 var fire_rate = 0.4      
-var shoot_timer = 0.2    
+var shoot_timer = 0.5    
 var BOT_DAMAGE = 15
 var RELOAD_TIME = 1.5
 var last_seen_enemy
@@ -44,13 +44,13 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
-		SPEED = manager.bot_speed * 1.3
-		DIST_ATTACK = manager.bot_dist_attack * 1.3
-		DIST_CHASE = manager.bot_dist_chase* 1.3
-		SPREAD = manager.bot_spread* 1.3
-		fire_rate = manager.bot_fire_rate* 1.3
-		BOT_DAMAGE = manager.bot_damage* 1.3
-		RELOAD_TIME = manager.bot_reload_time		* 1.3
+		SPEED = manager.bot_speed * 1.2
+		DIST_ATTACK = manager.bot_dist_attack * 0.8
+		DIST_CHASE = manager.bot_dist_chase* 1.2
+		SPREAD = manager.bot_spread* 0.8
+		fire_rate = manager.bot_fire_rate
+		BOT_DAMAGE = manager.bot_damage* 1.2
+		RELOAD_TIME = manager.bot_reload_time* 0.8
 	else:
 		print("ModeManager nenalezen, bot běží na defaultu.")
 func _ready():
