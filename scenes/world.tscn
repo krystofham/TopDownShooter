@@ -1217,3 +1217,4 @@ tile_set = SubResource("TileSet_xbask")
 [node name="UI" parent="." unique_id=506577777 instance=ExtResource("4_k0juu")]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=492888967]
+color = Color(0, 0, 0, 1)

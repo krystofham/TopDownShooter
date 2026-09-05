@@ -44,13 +44,13 @@ func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
 func apply_rank_difficulty():
 	if has_node("/root/ModeManager"):
 		var manager = get_node("/root/ModeManager")
-		SPEED = manager.bot_speed
-		DIST_ATTACK = manager.bot_dist_attack
-		DIST_CHASE = manager.bot_dist_chase
-		SPREAD = manager.bot_spread
-		fire_rate = manager.bot_fire_rate
-		BOT_DAMAGE = manager.bot_damage
-		RELOAD_TIME = manager.bot_reload_time		
+		SPEED = manager.bot_speed * 1.3
+		DIST_ATTACK = manager.bot_dist_attack * 1.3
+		DIST_CHASE = manager.bot_dist_chase* 1.3
+		SPREAD = manager.bot_spread* 1.3
+		fire_rate = manager.bot_fire_rate* 1.3
+		BOT_DAMAGE = manager.bot_damage* 1.3
+		RELOAD_TIME = manager.bot_reload_time		* 1.3
 	else:
 		print("ModeManager nenalezen, bot běží na defaultu.")
 func _ready():

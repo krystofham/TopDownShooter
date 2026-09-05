@@ -56,6 +56,14 @@ func apply_rank_difficulty():
 
 func _ready():
 	apply_rank_difficulty()
+	DIST_ATTACK 		*= 0.75
+	DIST_CHASE 			*= 0.75
+	change_dir_timer 	*= 0.75
+	SPREAD				*= 0.75
+	fire_rate 			*= 0.75     
+	shoot_timer 		*= 0.75   
+	BOT_DAMAGE 			*= 0.75
+	RELOAD_TIME 		*= 0.75
 	await get_tree().physics_frame
 	
 	var random_pos = get_random_position_in_zone()
