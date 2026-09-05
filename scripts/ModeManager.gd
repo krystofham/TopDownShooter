@@ -133,7 +133,7 @@ func start_match(mode: String, map_path: String):
 	update_bot_difficulty()
 	if has_node("/root/GameManager"):
 		if current_mode == "ranked":
-			get_node("/root/GameManager").init_match(24, current_mode, map_path)
+			get_node("/root/GameManager").init_match(21, current_mode, map_path)
 		else:
 			get_node("/root/GameManager").init_match(15, current_mode, map_path)
 	else:

@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-var health = 200
+var health = 120
 var SPEED = 120.0
 const MAX_AMO = 15
 var amo = 15
