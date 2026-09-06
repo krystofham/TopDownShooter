@@ -1,6 +1,6 @@
 extends Node2D
 const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
-
+signal counter_changed(counter_score: int, terr_score: int)
 var counter =  5
 var terrorist = 5
 var kills = 0
@@ -42,6 +42,7 @@ func entity_died(is_counter, is_killed):
 func i_killed():
 	kills += 1
 func evaluate():
+	counter_changed.emit(counter, terrorist)
 	if counter == 0:
 		GameManager.register_round_results(false, kills, true)
 	if terrorist == 0:

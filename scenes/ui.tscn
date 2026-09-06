@@ -54,3 +54,14 @@ anchor_right = 1.0
 offset_left = -40.0
 offset_bottom = 23.0
 grow_horizontal = 0
+
+[node name="CounterLabel" type="Label" parent="HUD" unique_id=729340744]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1148.0
+offset_top = 623.0
+offset_right = -693.0
+offset_bottom = 646.0
+grow_horizontal = 0

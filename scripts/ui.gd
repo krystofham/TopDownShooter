@@ -4,6 +4,8 @@ extends CanvasLayer
 @onready var amo_label = $HUD/AmoLabel
 @onready var time_label = $HUD/TimeLabel
 @onready var score_label = $HUD/ScoreLabel
+@onready var counter_label = $HUD/CounterLabel
+
 const GAME_OVER_MENU_SCENE = preload("res://scenes/game_over_menu.tscn")
 
 var time_elapsed = 100.0
@@ -14,6 +16,9 @@ func _ready():
 	GameManager.score_changed.connect(update_score)
 	update_score(GameManager.score_team_a, GameManager.score_team_b)
 	update_amo([20, 10], [20, 10], "primary") # Hned na startu ukážeme plný zásobník
+	get_parent().counter_changed.connect(update_counter)
+	update_counter(get_parent().counter, get_parent().terrorist)
+
 
 func _process(delta):
 	# Počítání času hry (odpočítávání dolů z 100)
@@ -45,7 +50,10 @@ func update_time_display():
 		game_over()
 
 func update_score(counter_score: int, terr_score: int):
-	score_label.text = "Counter: " + str(counter_score) + " | Terrorist: " + str(terr_score)
+	score_label.text = "SCORE: - Counter: " + str(counter_score) + " | Terrorist: " + str(terr_score)
+func update_counter(counter_score: int, terr_score: int):
+	counter_label.text = "Counter: " + str(counter_score) + " | Terrorist: " + str(terr_score)
+
 func game_over():
 	var game_over_instance = GAME_OVER_MENU_SCENE.instantiate()
 	get_tree().current_scene.add_child(game_over_instance)
