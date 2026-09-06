@@ -202,6 +202,36 @@ func take_damage(amount):
 		ui.update_health(health)
 	if health <= 0:
 		round_over()
+		
+func get_arena_rect() -> Rect2:
+	var zones = []
+	var t_spawn = get_tree().current_scene.get_node_or_null("TerSpawn")
+	var c_spawn = get_tree().current_scene.get_node_or_null("CounterSpawn")
+	if t_spawn:
+		zones.append(t_spawn)
+	if c_spawn:
+		zones.append(c_spawn)
+
+	var combined_rect = Rect2()
+	var first = true
+	for zone in zones:
+		var shape_node = zone.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if not shape_node or not shape_node.shape is RectangleShape2D:
+			continue
+		var extents = (shape_node.shape as RectangleShape2D).size / 2
+		var zone_rect = Rect2(shape_node.global_position - extents, extents * 2)
+		if first:
+			combined_rect = zone_rect
+			first = false
+		else:
+			combined_rect = combined_rect.merge(zone_rect)
+
+	if first:
+		combined_rect = Rect2(Vector2.ZERO, Vector2(2000, 2000))
+
+	return combined_rect
+	
+
 func round_over():
 	print("[DEBUG] round_over() spuštěno")
 	emit_signal("request_action", "player_dead")
@@ -209,20 +239,30 @@ func round_over():
 	if camera:
 		var cam_global_pos = camera.global_position
 		var old_parent = camera.get_parent()
-
 		if old_parent:
 			old_parent.remove_child(camera)
-
 		var scene_root = get_tree().current_scene
 		if scene_root:
 			scene_root.add_child(camera)
-
 		camera.global_position = cam_global_pos
-
 		camera.make_current()
 
+		var arena_rect = get_arena_rect() 
+		var viewport_size = get_viewport().get_visible_rect().size
+
+		var zoom_x = arena_rect.size.x / viewport_size.x
+		var zoom_y = arena_rect.size.y / viewport_size.y
+		var target_zoom_value = max(zoom_x, zoom_y) * 1.1 
+		var target_zoom = Vector2(target_zoom_value, target_zoom_value)
+
+		var target_center = arena_rect.position + arena_rect.size / 2.0
+
 		var tween = create_tween()
-		tween.tween_property(camera, "zoom", Vector2(0.6, 0.6), 1.0)
+		tween.set_parallel(true)
+		tween.tween_property(camera, "zoom", target_zoom, 1.0)
+		tween.tween_property(camera, "global_position", target_center, 1.0)
+
+
 	var canvas_modulate = get_tree().current_scene.get_node_or_null("CanvasModulate")
 	if canvas_modulate:
 		canvas_modulate.color = Color(1.0, 0.3, 0.3, 1.0)

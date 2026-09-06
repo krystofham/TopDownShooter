@@ -52,6 +52,10 @@ uppercase = true
 layout_mode = 2
 text = "Hraj"
 
+[node name="PlayShort" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1044741383]
+layout_mode = 2
+text = "Play Short"
+
 [node name="PlayRankedButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=894699189]
 layout_mode = 2
 text = "Play Ranked"

@@ -47,7 +47,7 @@ func evaluate():
 		GameManager.register_round_results(false, kills, true)
 	if terrorist == 0:
 		GameManager.register_round_results(true, kills, false)
-func game_over():
+func game_over(victory: bool = false):
 	var game_over_instance = GAME_OVER_MENU_SCENE.instantiate()
+	game_over_instance.is_victory = victory
 	get_tree().current_scene.add_child(game_over_instance)
-	queue_free()

@@ -9,11 +9,12 @@ func _ready():
 	var play_btn = get_node_or_null("MarginContainer/VBoxContainer/PlayButton")
 	var quit_btn = get_node_or_null("MarginContainer/VBoxContainer/QuitButton")
 	var play_Ranked_btn = get_node_or_null("MarginContainer/VBoxContainer/PlayRankedButton")
-
+	var play_Short_btn = get_node_or_null("MarginContainer/VBoxContainer/PlayShort")
 	if play_btn and not play_btn.pressed.is_connected(_on_play_button_pressed):
 		play_btn.pressed.connect(_on_play_button_pressed)
 	if play_Ranked_btn and not play_Ranked_btn.pressed.is_connected(_on_play_button_pressed):
 		play_Ranked_btn.pressed.connect(_on_play_ranked_button_pressed)
+	play_Short_btn.pressed.connect(_on_play_short_button_pressed)
 	if quit_btn and not quit_btn.pressed.is_connected(_on_quit_button_pressed):
 		quit_btn.pressed.connect(_on_quit_button_pressed)
 	update_player_stats_ui()
@@ -41,11 +42,8 @@ func update_player_stats_ui():
 func _on_play_button_pressed():
 	print("Přesun do ModeManageru...")
 	if has_node("/root/ModeManager"):
-		# V ostré verzi zde otevřeš menu Casual/Ranked, 
-		# pro teď natvrdo řekneme ModeManageru, ať spustí Casual na naší mapě
 		ModeManager.start_match("casual", MAIN_GAME_SCENE_PATH)
 	else:
-		# Záložní plán, pokud ještě nemáš Autoload hotový
 		get_tree().change_scene_to_file(MAIN_GAME_SCENE_PATH)
 func _on_play_ranked_button_pressed():
 	if has_node("/root/ModeManager"):
@@ -55,6 +53,14 @@ func _on_play_ranked_button_pressed():
 	else:
 		# Záložní plán, pokud ještě nemáš Autoload hotový
 		get_tree().change_scene_to_file(MAIN_GAME_SCENE_PATH)
+func _on_play_short_button_pressed():
+	if has_node("/root/ModeManager"):
+		# V ostré verzi zde otevřeš menu Casual/Ranked, 
+		# pro teď natvrdo řekneme ModeManageru, ať spustí Casual na naší mapě
+		ModeManager.start_match("short", MAIN_GAME_SCENE_PATH)
+	else:
+		# Záložní plán, pokud ještě nemáš Autoload hotový
+		get_tree().change_scene_to_file(MAIN_GAME_SCENE_PATH)
+
 func _on_quit_button_pressed():
-	print("Zavírám hru...")
 	get_tree().quit()

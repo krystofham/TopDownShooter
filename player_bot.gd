@@ -32,6 +32,15 @@ var RELOAD_TIME = 1.5
 var last_seen_player
 var patrol_dir = Vector2.RIGHT.rotated(randf_range(0, TAU)).normalized()
 
+# --- Reference na hráče, kvůli rychlejšímu seskupení po jeho smrti ---
+@onready var player_node = get_node_or_null("../Player")
+var REGROUP_SPEED_MULT = 1.6
+
+# --- Omezení frekvence přepočtu cíle navigace (méně "cukání" a chození sem a tam) ---
+var target_update_timer = 0.0
+var TARGET_UPDATE_INTERVAL = 0.2
+var last_target_pos = Vector2.INF
+
 
 ### Používá coop nodes in group
 func is_position_far_enough(pos: Vector2, min_dist: float) -> bool:
@@ -83,6 +92,11 @@ func _ready():
 
 	nav_agent.target_position = random_enemy_bot.global_position
 
+	# Lepší chování NavigationAgentu - méně "kmitání" po cestě
+	nav_agent.path_desired_distance = 16.0
+	nav_agent.target_desired_distance = 16.0
+	nav_agent.avoidance_enabled = true
+
 
 func get_random_position_in_zone() -> Vector2:
 	if not spawn_zone:
@@ -129,7 +143,6 @@ func get_closest_enemy(enemies, position):
 	return closest_enemy
 
 func update_state():
-	var bomb_planted = false
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	if enemies.is_empty():
 		return
@@ -154,9 +167,6 @@ func update_state():
 				current_state = "EVADING"
 	else:
 		current_state = "PATROLLING"
-		
-	if bomb_planted:
-		current_state = "DETONATING"
 
 func _play_footstep_asynch():
 	is_playing_footstep = true
@@ -179,23 +189,73 @@ func can_see_enemy(enemy_check) -> bool:
 			return true
 	return false
 
-func _physics_process(delta):
+func find_enemy():
+	# Projde všechny protivníky a vybere nejbližšího VIDITELNÉHO, jinak alespoň
+	# nejbližšího celkově - bot se tak nezasekne na prvním, koho náhodou uvidí.
+	var other_bots = get_tree().get_nodes_in_group("enemies")
+	var closest_dist = INF
+	var closest_enemy = null
+	var closest_visible_dist = INF
+	var closest_visible_enemy = null
 
+	for e in other_bots:
+		if not is_instance_valid(e):
+			continue
+		var d = global_position.distance_to(e.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest_enemy = e
+		if d < closest_visible_dist and can_see_enemy(e):
+			closest_visible_dist = d
+			closest_visible_enemy = e
+
+	if closest_visible_enemy:
+		enemy = closest_visible_enemy
+	elif closest_enemy:
+		enemy = closest_enemy
+
+func try_regroup_with_allies(delta) -> bool:
+	# Když hráč zemře, spoluhráčtí boti (tým "coop") se rychleji seskupí u sebe
+	# navzájem, místo aby dál bezcílně pochodovali po mapě.
+	if is_instance_valid(player_node):
+		return false
+
+	var allies = get_tree().get_nodes_in_group("enemies")
+	var nearest_ally = null
+	var nearest_dist = INF
+	for a in allies:
+		if a == self or not is_instance_valid(a):
+			continue
+		var d = global_position.distance_to(a.global_position)
+		if d < nearest_dist:
+			nearest_dist = d
+			nearest_ally = a
+
+	if nearest_ally == null or nearest_dist < 60.0:
+		return false
+
+	nav_agent.target_position = nearest_ally.global_position
+	var next_path_position = nav_agent.get_next_path_position()
+	var direction = (next_path_position - global_position).normalized()
+	if direction != Vector2.ZERO:
+		look_at(nearest_ally.global_position)
+
+	var target_velocity = direction * SPEED * REGROUP_SPEED_MULT
+	velocity = velocity.lerp(target_velocity, clamp(delta * 8.0, 0.0, 1.0))
+	move_and_slide()
+
+	if velocity != Vector2.ZERO and not is_playing_footstep:
+		_play_footstep_asynch()
+	animated_sprite.play("Machine" if direction != Vector2.ZERO else "Standing")
+	return true
+
+func _physics_process(delta):
+	if try_regroup_with_allies(delta):
+		return
 
 	if not is_instance_valid(enemy) or enemy == null:
 		enemy = null
-		var other_bots = get_tree().get_nodes_in_group("enemies")
-		var dist = INF
-		for e in other_bots:
-			if not is_instance_valid(e):
-				continue
-			if self.position.distance_to(e.position) < dist:
-				enemy = e
-				dist = self.position.distance_to(e.position)
-			if can_see_enemy(e):
-				enemy = e
-				break
-
+		find_enemy()
 		if !enemy:
 			return
 	else:
@@ -207,7 +267,16 @@ func _physics_process(delta):
 		if current_state == "CHASING":
 			look_at(enemy.global_position)
 			last_seen_player = enemy.global_position
-			nav_agent.target_position = enemy.global_position			
+
+			# Cíl navigace se nepřepočítává úplně každý frame, jen když se cíl
+			# posunul dostatečně nebo uplynul interval - odstraňuje neustálé
+			# mikro-přepočítávání cesty vypadající jako "chození sem a tam".
+			target_update_timer += delta
+			if target_update_timer >= TARGET_UPDATE_INTERVAL or last_target_pos.distance_to(enemy.global_position) > 30.0:
+				nav_agent.target_position = enemy.global_position
+				last_target_pos = enemy.global_position
+				target_update_timer = 0.0
+
 			var next_path_position = nav_agent.get_next_path_position()
 			direction = (next_path_position - global_position).normalized()
 			
@@ -231,11 +300,11 @@ func _physics_process(delta):
 					found = true
 			if not found:
 				change_dir_timer += delta
-				var max_patrol_time = (get_node("/root/ModeManager").bot_change_dir_time * 3.0) if has_node("/root/ModeManager") else 1.5
+				var max_patrol_time = (get_node("/root/ModeManager").bot_change_dir_time * 3.0) if has_node("/root/ModeManager") else 2.5
 				if change_dir_timer > max_patrol_time or nav_agent.is_navigation_finished():
 					change_dir_timer = 0.0
-					patrol_dir = patrol_dir.rotated(randf_range(PI/-4, PI/4)).normalized()
-					var target_position = global_position + patrol_dir * 250.0
+					patrol_dir = patrol_dir.rotated(randf_range(PI/-8, PI/8)).normalized()
+					var target_position = global_position + patrol_dir * 350.0
 					nav_agent.target_position = target_position
 					
 			var next_path_position = nav_agent.get_next_path_position()
@@ -251,7 +320,8 @@ func _physics_process(delta):
 		else:
 			animated_sprite.play("Machine")
 		
-		velocity = direction * (0.0 if is_reloading else SPEED)
+		var target_velocity = direction * (0.0 if is_reloading else SPEED)
+		velocity = velocity.lerp(target_velocity, clamp(delta * 8.0, 0.0, 1.0))
 		move_and_slide()
 		
 		shoot_timer += delta
@@ -281,6 +351,9 @@ func bot_shoot():
 	shoot_sound.pitch_scale = randf_range(0.9, 1.1)
 	shoot_sound.volume_db = randf_range(0.9, 1.1)
 	shoot_sound.play()
+
+	# Playerbot se při výstřelu vždy natočí přesně tam, kam střílí.
+	look_at(enemy.global_position)
 	
 	muzzle_flash.visible = true
 	get_tree().create_timer(0.05).timeout.connect(func(): muzzle_flash.visible = false)

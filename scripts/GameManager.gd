@@ -32,6 +32,10 @@ func init_match(max_rounds: int, mode: String, map_path: String):
 	
 	print("GameManager: Zápas inicializován. Mód: ", current_game_mode, ", Kola: ", match_max_rounds)
 	
+	# Pokud jsme přišli z Game Over menu (nebo odjinud), strom mohl zůstat zapauzovaný.
+	# Před spuštěním nové hry ho vždy odpauzujeme.
+	get_tree().paused = false
+	
 	# Načtení Map Menu / Loading scény (případně rovnou mapy)
 	# Prozatím načteme rovnou mapu přes cestu, kterou jsme dostali
 	get_tree().change_scene_to_file(map_scene_path)

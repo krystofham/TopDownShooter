@@ -22,7 +22,7 @@ func update_bot_difficulty():
 
 	# Ranked = hráčovo ELO
 	# Casual = Silver 2/3 baseline
-	var effective_elo = elo if current_mode == "ranked" else 650
+	var effective_elo = elo if (current_mode == "ranked" or current_mode == "short") else 650
 
 	var clamped_elo = clampi(effective_elo, 0, 2000)
 
@@ -134,6 +134,8 @@ func start_match(mode: String, map_path: String):
 	if has_node("/root/GameManager"):
 		if current_mode == "ranked":
 			get_node("/root/GameManager").init_match(21, current_mode, map_path)
+		elif current_mode == "short":
+			get_node("/root/GameManager").init_match(9, current_mode, map_path)
 		else:
 			get_node("/root/GameManager").init_match(15, current_mode, map_path)
 	else:
@@ -142,7 +144,7 @@ func start_match(mode: String, map_path: String):
 func process_match_end(victory: bool, final_kills: int, final_deaths: int):
 	print("ModeManager: Zapas skoncil. Zpracovavam vysledky...")
 	
-	if current_mode == "ranked":
+	if current_mode == "ranked" or current_mode == "short":
 		var elo_change = 0
 		if victory:
 			elo_change += 25
@@ -150,8 +152,10 @@ func process_match_end(victory: bool, final_kills: int, final_deaths: int):
 			elo_change -= 20
 		
 		elo_change += (final_kills - final_deaths) * 2 
-		
-		elo += elo_change
+		if current_mode == "ranked":
+			elo += elo_change
+		else:
+			elo += (elo_change/2)
 		print("Zmena ELO: ", elo_change, ". Nove celkove ELO: ", elo)
 		
 		# Aktualizujeme textový rank a hned zapišeme změny na disk
@@ -159,5 +163,11 @@ func process_match_end(victory: bool, final_kills: int, final_deaths: int):
 		save_system_config()
 	else:
 		print("Byl to Casual, ELO se nemeni.")
-		
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn") 
+
+	# Místo rovnou přepnutí scény zobrazíme Game Over menu nad aktuální scénou
+	var current_scene = get_tree().current_scene
+	if current_scene and current_scene.has_method("game_over"):
+		current_scene.game_over(victory)
+	else:
+		print("CHYBA: Aktuální scéna nemá metodu game_over(), přechod do hlavního menu.")
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
