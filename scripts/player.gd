@@ -233,7 +233,6 @@ func get_arena_rect() -> Rect2:
 	
 
 func round_over():
-	print("[DEBUG] round_over() spuštěno")
 	emit_signal("request_action", "player_dead")
 
 	if camera:

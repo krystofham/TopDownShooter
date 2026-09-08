@@ -45,12 +45,11 @@ mouse_filter = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1188767363]
 layout_mode = 2
-text = "Counter strike z wishe"
 uppercase = true
 
 [node name="PlayButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1800370984]
 layout_mode = 2
-text = "Hraj"
+text = "Play"
 
 [node name="PlayShort" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1044741383]
 layout_mode = 2
@@ -62,16 +61,15 @@ text = "Play Ranked"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1560443722]
 layout_mode = 2
-text = "Ukončit hru"
+text = "End game"
 
 [node name="PlayerStats" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1653182939]
 layout_mode = 2
-text = "Counter strike z wishe"
 uppercase = true
 
 [node name="RankLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2011296918]
 layout_mode = 2
-text = "Counter strike z wishe"
+text = "Your rank"
 uppercase = true
 
 [node name="Background" type="ColorRect" parent="." unique_id=1472541659]

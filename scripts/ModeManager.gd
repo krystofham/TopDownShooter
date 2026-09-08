@@ -1,7 +1,7 @@
 extends Node
 
 var username: String = "Krystof"
-var elo: int = 1000
+var elo: int = 600
 var player_rank: String = "Silver II"
 var rank_asset_path: String = "res://assets/ranks/silver2.png"
 

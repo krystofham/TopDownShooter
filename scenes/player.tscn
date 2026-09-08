@@ -119,5 +119,6 @@ texture_scale = 0.4
 
 [node name="Walk" type="AudioStreamPlayer2D" parent="." unique_id=531168565]
 stream = ExtResource("10_y4r1p")
+volume_db = -20.0
 max_distance = 200.0
 attenuation = 4.756826

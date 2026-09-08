@@ -88,5 +88,6 @@ debug_path_custom_color = Color(0, 1, 1, 1)
 
 [node name="Walk" type="AudioStreamPlayer2D" parent="." unique_id=637705193]
 stream = ExtResource("8_i22me")
+volume_db = -20.0
 max_distance = 965.0
 attenuation = 2.000001
